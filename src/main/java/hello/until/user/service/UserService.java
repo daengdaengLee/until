@@ -3,6 +3,7 @@ package hello.until.user.service;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
@@ -14,6 +15,7 @@ public class UserService {
 	
 	private final UserRepository userRepository;
 	
+	@Transactional 
 	public void createUser(String email, String password) {
 		
 		LocalDateTime currentDateTime = LocalDateTime.now();
@@ -23,12 +25,13 @@ public class UserService {
 		User user = new User();
 		user.setEmail(email);
 		user.setPassword(password);
-		user.setCreateAt(currentDateTime);
-		user.setUpdateAt(currentDateTime);
+		user.setCreatedAt(currentDateTime);
+		user.setUpdatedAt(currentDateTime);
 		userRepository.save(user);
 		
 	}
 	
+	@Transactional(readOnly = true)
 	public void validateUser(String eamil) {
 		User findUser = userRepository.findByEmail(eamil);
 		if(findUser != null) {
