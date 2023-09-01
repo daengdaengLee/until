@@ -50,4 +50,19 @@ class ItemServiceTest {
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get()).isEqualTo(this.testItem);
     }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 아이디로 조회하면 빈 Optional 객체를 반환한다.")
+    void readNoItem() {
+        // given
+        var testItemId = this.testItem.getId();
+        Mockito.when(this.itemRepository.findById(testItemId))
+                .thenReturn(Optional.empty());
+
+        // when
+        var result = this.itemService.readItem(testItemId);
+
+        // then
+        assertThat(result.isEmpty()).isTrue();
+    }
 }
