@@ -1,4 +1,11 @@
 package hello.until.user.repository;
 
-public interface UserRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import hello.until.user.entity.User;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+
+
+
 }
