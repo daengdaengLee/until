@@ -13,6 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,5 +68,25 @@ class ItemServiceTest {
 
         // then
         assertThat(result.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품명, 상품 가격으로 상품을 등록한다.")
+    void createItem() {
+        // given
+        Long id = this.testItem.getId();
+        String name = this.testItem.getName();
+        Integer price = this.testItem.getPrice();
+
+        Mockito.when(this.itemRepository.save(any(Item.class))).thenReturn(this.testItem);
+
+        // when
+        Item item = itemService.createItem(name, price);
+
+        // then
+        assertNotNull(item);
+        assertEquals(id, item.getId());
+        assertEquals(name, item.getName());
+        assertEquals(price, item.getPrice());
     }
 }
