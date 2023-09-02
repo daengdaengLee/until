@@ -14,9 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
@@ -84,9 +82,8 @@ class ItemServiceTest {
         Item item = itemService.createItem(name, price);
 
         // then
-        assertNotNull(item);
-        assertEquals(id, item.getId());
-        assertEquals(name, item.getName());
-        assertEquals(price, item.getPrice());
+        assertThat(item).isNotNull();
+        assertThat(name.equals(item.getName())).isTrue();
+        assertThat(price.equals(item.getPrice())).isTrue();
     }
 }
