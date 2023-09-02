@@ -27,12 +27,13 @@ class ItemServiceTest {
     void beforeEach() {
         this.itemService = new ItemService(this.itemRepository);
 
-        this.testItem = new Item();
-        this.testItem.setId(1L);
-        this.testItem.setName("테스트 상품");
-        this.testItem.setPrice(10_000);
-        this.testItem.setCreatedAt(LocalDateTime.now());
-        this.testItem.setUpdatedAt(LocalDateTime.now());
+        this.testItem = Item.builder()
+                .id(1L)
+                .name("테스트 상품")
+                .price(10_000)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
