@@ -1,6 +1,7 @@
 package hello.until.user.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,9 @@ public class UserService {
 		
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		
-		validateUser(email);
+		if(validateUser(email).isPresent()) {
+			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
+		};
 		
 		User user = new User();
 		user.setEmail(email);
@@ -31,11 +34,9 @@ public class UserService {
 		
 	}
 	
-	@Transactional(readOnly = true)
-	public void validateUser(String eamil) {
-		User findUser = userRepository.findByEmail(eamil);
-		if(findUser != null) {
-			throw new IllegalStateException("이미 가입된 회원 메일입니다.");
-		}
+	private Optional<User> validateUser(String eamil) {
+		User user = userRepository.findByEmail(eamil);
+		return Optional.ofNullable(user);
+		
 	}
 }
