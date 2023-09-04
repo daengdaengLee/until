@@ -4,7 +4,6 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.item.entity.Item;
 import hello.until.item.repository.ItemRepository;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,16 +31,12 @@ public class ItemService {
     }
 
     @Transactional
-    public Item updateItem(UpdateItemInputDto inputDto) {
-        var item = this.itemRepository.findById(inputDto.id)
+    public Item updateItem(long id, String name, int price) {
+        var item = this.itemRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
-        item.setName(inputDto.name);
-        item.setPrice(inputDto.price);
+        item.setName(name);
+        item.setPrice(price);
         this.itemRepository.save(item);
         return item;
-    }
-
-    @Builder
-    public record UpdateItemInputDto(long id, String name, int price) {
     }
 }

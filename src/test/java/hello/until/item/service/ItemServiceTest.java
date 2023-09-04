@@ -116,13 +116,7 @@ class ItemServiceTest {
                 .thenReturn(updatedItem);
 
         // when
-        var inputDto = ItemService.UpdateItemInputDto
-                .builder()
-                .id(id)
-                .name(updatedName)
-                .price(updatedPrice)
-                .build();
-        var result = this.itemService.updateItem(inputDto);
+        var result = this.itemService.updateItem(id, updatedName, updatedPrice);
 
         // then
         var itemCaptor = ArgumentCaptor.forClass(Item.class);
@@ -146,13 +140,7 @@ class ItemServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        var inputDto = ItemService.UpdateItemInputDto
-                .builder()
-                .id(noItemId)
-                .name("없는 상품")
-                .price(10_000)
-                .build();
-        var ex = catchThrowable(() -> this.itemService.updateItem(inputDto));
+        var ex = catchThrowable(() -> this.itemService.updateItem(noItemId, "없는 상품", 10_000));
 
         // then
         assertThat(ex).isInstanceOf(CustomException.class);
