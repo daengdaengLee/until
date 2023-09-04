@@ -63,7 +63,7 @@ public class UserServiceTest {
 	}
 	
 	@Test
-	@DisplayName("회원조회 테스트")
+	@DisplayName("가입 회원조회 테스트 - Optional 객체 반환")
 	void getUser() {
 
         // given
@@ -72,11 +72,27 @@ public class UserServiceTest {
                 .thenReturn(Optional.of(this.testUser));
 
         // when
-        User result = this.userService.getUserById(testUserId);
+        Optional<User> result = this.userService.getUserById(testUserId);
 
         // then
-        assertThat(result.getId()).isEqualTo(this.testUser.getId());
-        assertThat(result.getEmail()).isEqualTo(this.testUser.getEmail());
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get()).isEqualTo(this.testUser);
+	}
+	
+	@Test
+	@DisplayName("미가입 회원조회 테스트 - Optional 빈 객체 반환")
+	void getNoUser() {
+
+        // given
+        Long testUserId = this.testUser.getId();
+        Mockito.when(this.userRepository.findById(testUserId))
+                .thenReturn(Optional.empty());
+
+        // when
+        Optional<User> result = this.userService.getUserById(testUserId);
+
+        // then
+        assertThat(result.isEmpty()).isTrue();
 	}
 
 }

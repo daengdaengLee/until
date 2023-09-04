@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import hello.until.user.dto.request.CreateUserRequest;
-import hello.until.user.dto.response.getUserResponse;
+import hello.until.user.dto.response.GetUserResponse;
 import hello.until.user.entity.User;
 import hello.until.user.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,9 +31,9 @@ public class UserController {
 	
 	
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable Long id){
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(new getUserResponse(user));
+    public ResponseEntity<?> getUserById(@PathVariable long id){
+        User user = userService.getUserById(id).orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+        return ResponseEntity.ok(new GetUserResponse(user));
     }
 	
 }
