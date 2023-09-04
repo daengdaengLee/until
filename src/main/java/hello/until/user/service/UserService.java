@@ -40,11 +40,11 @@ public class UserService {
 	}
 
 	public Optional<User> updateUser(long userId, String email, String password){
-		LocalDateTime currentDateTime = LocalDateTime.now();
 		Optional<User> opUser = this.getUserById(userId);
 		if(opUser.isPresent()){
 			User user = opUser.get();
-			user.updateUser(email, password, currentDateTime);
+			user.updateEmail(email);
+			user.updatePassword(password);
 			user = userRepository.save(user);
 			return Optional.ofNullable(user);
 		}

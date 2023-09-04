@@ -35,11 +35,11 @@ public class UserController {
 
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updateUser(@PathVariable Long id,
-												   @RequestBody @Valid UpdateUserRequest updateUserRequest){
+										@RequestBody @Valid UpdateUserRequest updateUserRequest){
 		Optional<User> user = userService.updateUser(
 				id,
-				updateUserRequest.getEmail(),
-				updateUserRequest.getPassword());
+				updateUserRequest.email(),
+				updateUserRequest.password());
 		if (user.isPresent())
 			return ResponseEntity.ok(new GetUserResponse(user.get()));
 		else

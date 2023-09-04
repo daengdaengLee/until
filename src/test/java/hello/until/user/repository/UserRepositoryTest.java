@@ -51,8 +51,7 @@ public class UserRepositoryTest {
         user.setCreatedAt(currentDateTime);
         user.setUpdatedAt(currentDateTime);
         User dbUser = userRepository.save(user);
-        LocalDateTime updateDateTime = LocalDateTime.now();
-        dbUser.updateUser("test2@test.com", null, updateDateTime);
+        dbUser.updateEmail("test2@test.com");
         // when
         User savedUser = userRepository.save(dbUser);
 

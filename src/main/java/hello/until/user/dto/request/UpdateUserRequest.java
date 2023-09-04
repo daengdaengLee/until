@@ -1,11 +1,7 @@
 package hello.until.user.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+public record UpdateUserRequest(
+        String email,
+        String password){
 
-@Getter
-@Setter
-public class UpdateUserRequest {
-    private String email;
-    private String password;
 }
