@@ -1,6 +1,10 @@
 package hello.until.user.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +30,13 @@ public class UserServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		userService = new UserService(userRepository);
-
+		
+	    testUser = new User(); 
+	    testUser.setId(1L);
+	    testUser.setEmail("test@test.com");
+	    testUser.setPassword("12341234");
+	    testUser.setCreatedAt(LocalDateTime.now());
+	    testUser.setUpdatedAt(LocalDateTime.now());
 	}
 
 	@Test
@@ -50,6 +60,39 @@ public class UserServiceTest {
 
 		Mockito.verify(this.userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 
+	}
+	
+	@Test
+	@DisplayName("가입 회원조회 테스트 - Optional 객체 반환")
+	void getUser() {
+
+        // given
+        Long testUserId = this.testUser.getId();
+        Mockito.when(this.userRepository.findById(testUserId))
+                .thenReturn(Optional.of(this.testUser));
+
+        // when
+        Optional<User> result = this.userService.getUserById(testUserId);
+
+        // then
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get()).isEqualTo(this.testUser);
+	}
+	
+	@Test
+	@DisplayName("미가입 회원조회 테스트 - Optional 빈 객체 반환")
+	void getNoUser() {
+
+        // given
+        Long testUserId = this.testUser.getId();
+        Mockito.when(this.userRepository.findById(testUserId))
+                .thenReturn(Optional.empty());
+
+        // when
+        Optional<User> result = this.userService.getUserById(testUserId);
+
+        // then
+        assertThat(result.isEmpty()).isTrue();
 	}
 
 }

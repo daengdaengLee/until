@@ -8,12 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	
+
 	private final UserRepository userRepository;
 	
 	@Transactional 
@@ -36,6 +37,10 @@ public class UserService {
 		
 		if(user.isPresent())
 			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
-		
 	}
+
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(long id){
+        return userRepository.findById(id);
+    }
 }
