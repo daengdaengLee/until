@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ItemService {
     private final ItemRepository itemRepository;
 
-    public Optional<Item> readItem(Long id) {
+    public Optional<Item> readItem(long id) {
         return this.itemRepository.findById(id);
     }
 }
