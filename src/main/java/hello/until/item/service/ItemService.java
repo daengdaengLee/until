@@ -24,7 +24,7 @@ public class ItemService {
         return this.itemRepository.findById(id);
     }
 
-    public List<Item> readAllItem(int page, int size) {
+    public List<Item> readAllItems(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         PageRequest pageRequest = PageRequest.of(page, size, sort);
 

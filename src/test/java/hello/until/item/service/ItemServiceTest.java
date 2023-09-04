@@ -96,7 +96,7 @@ class ItemServiceTest {
                     .thenReturn(itemPage);
 
             // when
-            var result = itemService.readAllItem(page, size);
+            var result = itemService.readAllItems(page, size);
 
             // then
             assertThat(!result.isEmpty()).isTrue();
