@@ -39,4 +39,9 @@ public class ItemService {
         this.itemRepository.save(item);
         return item;
     }
+
+    @Transactional
+    public void deleteItem(long id) {
+        this.itemRepository.deleteById(id);
+    }
 }
