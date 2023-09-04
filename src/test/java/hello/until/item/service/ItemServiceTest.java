@@ -147,4 +147,20 @@ class ItemServiceTest {
         var code = ((CustomException) ex).getCode();
         assertThat(code).isEqualTo(ExceptionCode.NO_ITEM_TO_UPDATE);
     }
+
+    @Test
+    @DisplayName("상품 아이디로 삭제하면 해당 상품 삭제를 Repository 에 요청하고 종료한다.")
+    void deleteItem() {
+        // given
+        // testItem 사용
+
+        // when
+        this.itemService.deleteItem(this.testItem.getId());
+
+        // then
+        var idCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(this.itemRepository, times(1)).deleteById(idCaptor.capture());
+        var passedId = idCaptor.getValue();
+        assertThat(passedId).isEqualTo(this.testItem.getId());
+    }
 }
