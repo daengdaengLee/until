@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.*;
 
@@ -21,6 +24,8 @@ class ItemServiceTest {
     @Mock
     private ItemRepository itemRepository;
     private ItemService itemService;
+    @Captor
+    private ArgumentCaptor<Item> itemCaptor;
 
     private Item testItem;
 
@@ -72,7 +77,6 @@ class ItemServiceTest {
     @DisplayName("상품명, 상품 가격으로 상품을 등록한다.")
     void createItem() {
         // given
-        Long id = this.testItem.getId();
         String name = this.testItem.getName();
         Integer price = this.testItem.getPrice();
 
@@ -80,10 +84,14 @@ class ItemServiceTest {
 
         // when
         Item item = itemService.createItem(name, price);
+        verify(itemRepository).save(itemCaptor.capture());
+        Item saveItem = itemCaptor.getValue();
 
         // then
         assertThat(item).isNotNull();
         assertThat(name.equals(item.getName())).isTrue();
         assertThat(price.equals(item.getPrice())).isTrue();
+        assertThat(name.equals(saveItem.getName())).isTrue();
+        assertThat(price.equals(saveItem.getPrice())).isTrue();
     }
 }
