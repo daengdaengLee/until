@@ -26,7 +26,7 @@ public class UserController {
 
 	@PatchMapping("/{id}")
 	public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,
-										@RequestBody @Valid UpdateUserRequest updateUserRequest){
+												   @RequestBody @Valid UpdateUserRequest updateUserRequest){
 		User user = userService.updateUser(
 				id,
 				updateUserRequest.getEmail(),
