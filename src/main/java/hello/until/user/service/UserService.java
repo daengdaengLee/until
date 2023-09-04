@@ -42,8 +42,6 @@ public class UserService {
 	public User updateUser(long userId, String email, String password){
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		User user = this.getUserById(userId);
-		System.out.println(email);
-		System.out.println(password);
 		user.updateUser(email, password, currentDateTime);
 		return userRepository.save(user);
 	}

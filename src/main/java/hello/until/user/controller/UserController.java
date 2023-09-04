@@ -31,8 +31,6 @@ public class UserController {
 				id,
 				updateUserRequest.getEmail(),
 				updateUserRequest.getPassword());
-		System.out.println(user.getPassword());
-		System.out.println(user.getEmail());
 		return ResponseEntity.ok(new UserResponse(user));
 	}
 
