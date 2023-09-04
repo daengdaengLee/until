@@ -24,7 +24,7 @@ public class ItemController {
     }
 
     @PostMapping("")
-    public CreateItemResponse createItem(CreateItemRequest createItemRequest) {
+    public CreateItemResponse createItem(@RequestBody CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
 
