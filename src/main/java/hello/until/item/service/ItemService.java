@@ -20,13 +20,9 @@ public class ItemService {
 
     @Transactional
     public Item createItem(String name, Integer price) {
-        LocalDateTime now = LocalDateTime.now();
-
         Item item = Item.builder()
                 .name(name)
                 .price(price)
-                .createdAt(now)
-                .updatedAt(now)
                 .build();
 
         return itemRepository.save(item);
