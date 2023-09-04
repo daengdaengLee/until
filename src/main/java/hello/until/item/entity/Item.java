@@ -1,5 +1,7 @@
 package hello.until.item.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Item {
+    @JsonSerialize(using = ToStringSerializer.class)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
