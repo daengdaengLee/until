@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.*;
@@ -24,8 +25,6 @@ class ItemServiceTest {
     @Mock
     private ItemRepository itemRepository;
     private ItemService itemService;
-    @Captor
-    private ArgumentCaptor<Item> itemCaptor;
 
     private Item testItem;
 
@@ -84,14 +83,15 @@ class ItemServiceTest {
 
         // when
         Item item = itemService.createItem(name, price);
-        verify(itemRepository).save(itemCaptor.capture());
-        Item saveItem = itemCaptor.getValue();
 
         // then
-        assertThat(item).isNotNull();
+        var itemCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository, times(1)).save(itemCaptor.capture());
+        var passedItem = itemCaptor.getValue();
+        assertThat(name.equals(passedItem.getName())).isTrue();
+        assertThat(price.equals(passedItem.getPrice())).isTrue();
+
         assertThat(name.equals(item.getName())).isTrue();
         assertThat(price.equals(item.getPrice())).isTrue();
-        assertThat(name.equals(saveItem.getName())).isTrue();
-        assertThat(price.equals(saveItem.getPrice())).isTrue();
     }
 }
