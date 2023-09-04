@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,7 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
@@ -65,5 +70,28 @@ class ItemServiceTest {
 
         // then
         assertThat(result.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품명, 상품 가격으로 상품을 등록한다.")
+    void createItem() {
+        // given
+        String name = this.testItem.getName();
+        Integer price = this.testItem.getPrice();
+
+        Mockito.when(this.itemRepository.save(any(Item.class))).thenReturn(this.testItem);
+
+        // when
+        Item item = itemService.createItem(name, price);
+
+        // then
+        var itemCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository, times(1)).save(itemCaptor.capture());
+        var passedItem = itemCaptor.getValue();
+        assertThat(name.equals(passedItem.getName())).isTrue();
+        assertThat(price.equals(passedItem.getPrice())).isTrue();
+
+        assertThat(name.equals(item.getName())).isTrue();
+        assertThat(price.equals(item.getPrice())).isTrue();
     }
 }

@@ -8,12 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	
+
 	private final UserRepository userRepository;
 	
 	@Transactional 
@@ -36,18 +37,24 @@ public class UserService {
 		
 		if(user.isPresent())
 			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
-		
 	}
 
-	public User updateUser(long userId, String email, String password){
+	public Optional<User> updateUser(long userId, String email, String password){
 		LocalDateTime currentDateTime = LocalDateTime.now();
-		User user = this.getUserById(userId);
-		user.updateUser(email, password, currentDateTime);
-		return userRepository.save(user);
+		Optional<User> opUser = this.getUserById(userId);
+		if(opUser.isPresent()){
+			User user = opUser.get();
+			user.updateUser(email, password, currentDateTime);
+			user = userRepository.save(user);
+			return Optional.ofNullable(user);
+		}
+		else{
+			return Optional.empty();
+		}
 	}
 
-	private User getUserById(long id){
-		return userRepository.findById(id).orElseThrow(
-				() -> new RuntimeException("없는 사용자 입니다."));
-	}
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(long id){
+        return userRepository.findById(id);
+    }
 }

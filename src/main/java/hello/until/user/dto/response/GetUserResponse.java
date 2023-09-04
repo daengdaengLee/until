@@ -1,20 +1,18 @@
 package hello.until.user.dto.response;
 
+import java.time.LocalDateTime;
+
 import hello.until.user.entity.User;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
-public class UserResponse {
-    private Long id;
+public class GetUserResponse {
+    private final Long id;
+    private final String email;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
-    private String email;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public UserResponse(User user){
+    public GetUserResponse(User user){
         this.id = user.getId();
         this.email = user.getEmail();
         this.createdAt = user.getCreatedAt();
