@@ -1,6 +1,7 @@
 package hello.until.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,6 +40,29 @@ public class UserServiceTest {
 	}
 
 	@Test
+	@DisplayName("회원가입 테스트")
+	void createUser() {
+
+		String email = "test@test.com";
+		String password = "12341234";
+
+	    testUser = new User(); 
+	    testUser.setEmail(email);
+	    testUser.setPassword(password);
+		
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(invocation -> {
+	        User savedUser = invocation.getArgument(0);
+	        assertEquals(email, savedUser.getEmail()); 
+	        assertEquals(password, savedUser.getPassword()); 
+	        return testUser; 
+	    });
+		userService.createUser(email, password);
+
+		Mockito.verify(this.userRepository, Mockito.times(1)).save(Mockito.any(User.class));
+
+	}
+	
+	@Test
 	@DisplayName("회원조회 테스트")
 	void getUser() {
 
@@ -53,7 +77,6 @@ public class UserServiceTest {
         // then
         assertThat(result.getId()).isEqualTo(this.testUser.getId());
         assertThat(result.getEmail()).isEqualTo(this.testUser.getEmail());
-
 	}
 
 }
