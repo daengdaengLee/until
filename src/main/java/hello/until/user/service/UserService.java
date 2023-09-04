@@ -38,4 +38,18 @@ public class UserService {
 			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
 		
 	}
+
+	public User updateUser(long userId, String email, String password){
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		User user = this.getUserById(userId);
+		System.out.println(email);
+		System.out.println(password);
+		user.updateUser(email, password, currentDateTime);
+		return userRepository.save(user);
+	}
+
+	private User getUserById(long id){
+		return userRepository.findById(id).orElseThrow(
+				() -> new RuntimeException("없는 사용자 입니다."));
+	}
 }
