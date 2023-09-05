@@ -61,7 +61,7 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 유저를 찾을 수 없습니다.");
 	}
 	
-	@GetMapping("/")
+	@GetMapping("/getUsers")
 	public  Page<GetUserResponse> getUsers(Optional<Integer> page) {
 		Pageable pageable  = PageRequest.of(page.isPresent() ? page.get() : 0, 5);
         Page<User> userPage = userService.getUsers(pageable);
