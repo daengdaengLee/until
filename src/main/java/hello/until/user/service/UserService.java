@@ -3,6 +3,8 @@ package hello.until.user.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import hello.until.exception.CustomException;
+import hello.until.exception.ExceptionCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +12,6 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,18 +39,14 @@ public class UserService {
 			throw new CustomException(ExceptionCode.DUPLICATE_EAMIL_USER_TO_CREATE);
 	}
 
-	public Optional<User> updateUser(long userId, String email, String password){
-		Optional<User> opUser = this.getUserById(userId);
-		if(opUser.isPresent()){
-			User user = opUser.get();
-			user.updateEmail(email);
-			user.updatePassword(password);
-			user = userRepository.save(user);
-			return Optional.ofNullable(user);
-		}
-		else{
-			return Optional.empty();
-		}
+	public User updateUser(long userId, String email, String password){
+		User user = this.getUserById(userId).orElseThrow(
+				() -> new CustomException(ExceptionCode.NO_USER_TO_UPDATE)
+		);
+
+		user.updateEmail(email);
+		user.updatePassword(password);
+		return userRepository.save(user);
 	}
 
     @Transactional(readOnly = true)
