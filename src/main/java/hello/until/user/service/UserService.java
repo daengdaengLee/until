@@ -36,7 +36,7 @@ public class UserService {
 		Optional<User> user = userRepository.findByEmail(email);
 		
 		if(user.isPresent())
-			throw new CustomException(ExceptionCode.DUPLICATE_EAMIL_USER_TO_CREATE);
+			throw new CustomException(ExceptionCode.DUPLICATE_EMAIL_USER_TO_CREATE);
 	}
 
 	public User updateUser(long userId, String email, String password){
