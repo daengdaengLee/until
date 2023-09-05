@@ -35,16 +35,13 @@ public class UserController {
 	}
 
 	@PatchMapping("/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable Long id,
-										@RequestBody @Valid UpdateUserRequest updateUserRequest){
-		Optional<User> user = userService.updateUser(
+	public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,
+												   @RequestBody @Valid UpdateUserRequest updateUserRequest){
+		User user = userService.updateUser(
 				id,
 				updateUserRequest.email(),
 				updateUserRequest.password());
-		if (user.isPresent())
-			return ResponseEntity.ok(new UserResponse(user.get()));
-		else
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 유저를 찾을 수 없습니다.");
+		return ResponseEntity.ok(new UserResponse(user));
 	}
 
 	@GetMapping("/{id}")
