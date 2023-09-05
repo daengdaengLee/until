@@ -2,6 +2,7 @@ package hello.until.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -129,9 +131,16 @@ public class UserServiceTest {
 	    Page<User> users = userService.getUsers(pageable);
 	    
 	    //then
+	    var userCaptor = ArgumentCaptor.forClass(Pageable.class);
+	    Mockito.verify(this.userRepository, times(1)).findAllByOrderByIdDesc(userCaptor.capture());
+	    var passedItem = userCaptor.getValue();
+	    
+	    assertThat(passedItem.getPageNumber()).isEqualTo(0);
+	    assertThat(passedItem.getPageSize()).isEqualTo(5);
+	    
+	    
 	    assertThat(users).isNotNull();
 	    assertThat(users.getContent().size()).isEqualTo(5);
-	    assertThat(users.getContent().get(4).getEmail()).isEqualTo("test5@test.com");
 		
 		
 		
