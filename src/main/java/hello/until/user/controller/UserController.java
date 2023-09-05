@@ -1,6 +1,7 @@
 package hello.until.user.controller;
 
 import hello.until.user.dto.request.UpdateUserRequest;
+import hello.until.user.dto.response.UserResponse;
 import hello.until.user.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,7 @@ public class UserController {
 				updateUserRequest.email(),
 				updateUserRequest.password());
 		if (user.isPresent())
-			return ResponseEntity.ok(new GetUserResponse(user.get()));
+			return ResponseEntity.ok(new UserResponse(user.get()));
 		else
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 유저를 찾을 수 없습니다.");
 	}
