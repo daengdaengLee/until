@@ -35,8 +35,6 @@ public class UserServiceTest {
 	    testUser.setId(1L);
 	    testUser.setEmail("test@test.com");
 	    testUser.setPassword("12341234");
-	    testUser.setCreatedAt(LocalDateTime.now());
-	    testUser.setUpdatedAt(LocalDateTime.now());
 	}
 
 	@Test

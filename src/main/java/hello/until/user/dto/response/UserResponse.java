@@ -1,9 +1,11 @@
 package hello.until.user.dto.response;
 
-import hello.until.user.entity.User;
-
 import java.time.LocalDateTime;
 
+import hello.until.user.entity.User;
+import lombok.Getter;
+
+@Getter
 public class UserResponse {
     private final Long id;
     private final String email;
