@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import hello.until.exception.CustomException;
+import hello.until.exception.ExceptionCode;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,18 +42,14 @@ public class UserService {
 			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
 	}
 
-	public Optional<User> updateUser(long userId, String email, String password){
-		Optional<User> opUser = this.getUserById(userId);
-		if(opUser.isPresent()){
-			User user = opUser.get();
-			user.updateEmail(email);
-			user.updatePassword(password);
-			user = userRepository.save(user);
-			return Optional.ofNullable(user);
-		}
-		else{
-			return Optional.empty();
-		}
+	public User updateUser(long userId, String email, String password){
+		User user = this.getUserById(userId).orElseThrow(
+				() -> new CustomException(ExceptionCode.NO_USER_TO_UPDATE)
+		);
+
+		user.updateEmail(email);
+		user.updatePassword(password);
+		return userRepository.save(user);
 	}
 
     @Transactional(readOnly = true)
