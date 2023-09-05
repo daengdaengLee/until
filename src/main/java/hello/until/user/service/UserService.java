@@ -39,6 +39,20 @@ public class UserService {
 			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
 	}
 
+	public Optional<User> updateUser(long userId, String email, String password){
+		Optional<User> opUser = this.getUserById(userId);
+		if(opUser.isPresent()){
+			User user = opUser.get();
+			user.updateEmail(email);
+			user.updatePassword(password);
+			user = userRepository.save(user);
+			return Optional.ofNullable(user);
+		}
+		else{
+			return Optional.empty();
+		}
+	}
+
     @Transactional(readOnly = true)
     public Optional<User> getUserById(long id){
         return userRepository.findById(id);

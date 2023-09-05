@@ -23,4 +23,19 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public void updateEmail(String email){
+        if(email != null){
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            this.email = email;
+            this.updatedAt = currentDateTime;
+        }
+    }
+    public void updatePassword(String password){
+        if(password != null){
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            this.password = password;
+            this.updatedAt = currentDateTime;
+        }
+    }
+
 }
