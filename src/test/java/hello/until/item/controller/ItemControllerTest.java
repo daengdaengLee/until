@@ -83,7 +83,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, testItem.getPrice()))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -93,7 +93,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), null))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -103,7 +103,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null))))
                 .andExpect(status().isBadRequest());
     }
 }
