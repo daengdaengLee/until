@@ -3,12 +3,13 @@ package hello.until.user.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -56,5 +57,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> getUserById(long id){
         return userRepository.findById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public Page<User>getUsers(Pageable pageable){
+    	Page<User> users = userRepository.findAllByOrderByIdDesc(pageable);
+		
+    	
+    	return users;
+    	
     }
 }

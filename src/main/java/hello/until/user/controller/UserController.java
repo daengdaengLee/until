@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +59,14 @@ public class UserController {
 			return ResponseEntity.ok(new GetUserResponse(user.get()));
 		else
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 유저를 찾을 수 없습니다.");
+	}
+	
+	@GetMapping("/")
+	public  Page<GetUserResponse> getUsers(Optional<Integer> page) {
+		Pageable pageable  = PageRequest.of(page.isPresent() ? page.get() : 0, 5);
+        Page<User> userPage = userService.getUsers(pageable);
+        return userPage.map(user -> new GetUserResponse(user));
+
 	}
 
 }
