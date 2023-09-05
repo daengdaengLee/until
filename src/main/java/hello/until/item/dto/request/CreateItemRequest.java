@@ -1,4 +1,11 @@
 package hello.until.item.dto.request;
 
-public record CreateItemRequest(String name, Integer price) {
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+public record CreateItemRequest(
+        @NotEmpty
+        String name,
+        @NotNull
+        Integer price) {
 }

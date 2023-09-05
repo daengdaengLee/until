@@ -3,10 +3,10 @@ package hello.until.item.controller;
 import hello.until.item.dto.request.CreateItemRequest;
 import hello.until.item.dto.response.CreateItemResponse;
 import hello.until.item.dto.response.ReadItemResponse;
-import hello.until.item.entity.Item;
 import hello.until.item.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,14 +23,10 @@ public class ItemController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("")
-    public CreateItemResponse createItem(@RequestBody CreateItemRequest createItemRequest) {
+    @PostMapping
+    public CreateItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
-
-        if (name == null || name.isEmpty() || price == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
 
         return new CreateItemResponse(this.itemService.createItem(name, price));
     }
