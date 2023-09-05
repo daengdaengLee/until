@@ -6,14 +6,18 @@ import hello.until.item.entity.Item;
 import hello.until.item.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +60,67 @@ class ItemServiceTest {
         // then
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get()).isEqualTo(this.testItem);
+    }
+
+    @Nested
+    public class ReadAll {
+        private List<Item> testItems;
+
+        @BeforeEach
+        void beforeEach() {
+            this.testItems = new ArrayList<>();
+            for (long id = 99; id >= 0; id--) {
+                this.testItems.add(Item.builder()
+                        .id(id)
+                        .name("테스트 상품 " + id)
+                        .price(10_000)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build());
+            }
+        }
+
+        @Test
+        @DisplayName("page 와 size 로 조회하면 id 를 기준으로 역순 정렬해서 page 와 size 에 해당하는 상품 리스트를 반환 한다.")
+        void readAllItem() {
+            // given
+            int page = 1;
+            int size = 10;
+
+            PageRequest pageRequest = PageRequest.of(page, size);
+            int startIdx = (int) pageRequest.getOffset();
+            int endIdx = Math.min(startIdx + pageRequest.getPageSize(), testItems.size());
+            Page<Item> itemPage = new PageImpl<>(this.testItems.subList(startIdx, endIdx), pageRequest, this.testItems.size());
+
+            when(itemRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))))
+                    .thenReturn(itemPage);
+
+            // when
+            var result = itemService.readAllItems(page, size);
+
+            // then
+            assertThat(!result.isEmpty()).isTrue();
+            assertThat(result.size()).isEqualTo(size);
+
+            // repository 전달 값 검증
+            var pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(itemRepository, times(1)).findAll(pageableCaptor.capture());
+            var passedPageable = pageableCaptor.getValue();
+            assertThat(passedPageable.getPageNumber()).isEqualTo(page);
+            assertThat(passedPageable.getPageSize()).isEqualTo(size);
+
+            // 결과 값을 id를 통해 검증
+            int id = Math.toIntExact(this.testItems.get(startIdx).getId());
+            int idx = 0;
+            while(idx < size) {
+                Item now = result.get(idx);
+                assertThat(now.getId()).isEqualTo(id);
+                assertThat(now.getName()).isEqualTo("테스트 상품 " + id);
+                id--;
+                idx++;
+            }
+        }
+
     }
 
     @Test
