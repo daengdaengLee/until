@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,7 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
     private Item testItem;
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     @BeforeEach
     void beforeEach() {
@@ -49,7 +51,6 @@ class ItemControllerTest {
                 .createdAt(LocalDateTime.now().minusDays(1L))
                 .updatedAt(LocalDateTime.now())
                 .build();
-
     }
 
     @Nested
@@ -230,8 +231,10 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.id").value(testItem.getId().toString()))
                 .andExpect(jsonPath("$.data.name").value(testItem.getName()))
                 .andExpect(jsonPath("$.data.price").value(testItem.getPrice()))
-                .andExpect(jsonPath("$.data.createdAt").value(testItem.getCreatedAt().toString()))
-                .andExpect(jsonPath("$.data.updatedAt").value(testItem.getUpdatedAt().toString()));
+                .andExpect(jsonPath("$.data.createdAt")
+                        .value(testItem.getCreatedAt().format(this.dateTimeFormatter)))
+                .andExpect(jsonPath("$.data.updatedAt")
+                        .value(testItem.getUpdatedAt().format(this.dateTimeFormatter)));
 
         // service 호출 시 name, price 가 동일하게 전달되는지 검증
         var nameCaptor = ArgumentCaptor.forClass(String.class);
@@ -290,8 +293,10 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.id").value(this.testItem.getId().toString()))
                 .andExpect(jsonPath("$.data.name").value(this.testItem.getName()))
                 .andExpect(jsonPath("$.data.price").value(this.testItem.getPrice()))
-                .andExpect(jsonPath("$.data.createdAt").value(this.testItem.getCreatedAt().toString()))
-                .andExpect(jsonPath("$.data.updatedAt").value(this.testItem.getUpdatedAt().toString()));
+                .andExpect(jsonPath("$.data.createdAt")
+                        .value(this.testItem.getCreatedAt().format(this.dateTimeFormatter)))
+                .andExpect(jsonPath("$.data.updatedAt")
+                        .value(this.testItem.getUpdatedAt().format(this.dateTimeFormatter)));
         this.verifyItemServiceReadItem();
     }
 
