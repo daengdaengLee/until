@@ -8,7 +8,6 @@ import hello.until.item.service.ItemService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,8 +27,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public ReadAllItemResponse readAllItems(@RequestParam @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
-                                           @RequestParam @Min(value = 1, message = "사이즈는 1 이상이여야 합니다.") Integer size) {
+    public ReadAllItemResponse readAllItems(@RequestParam(required = false, defaultValue = "0") @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
+                                           @RequestParam(required = false, defaultValue = "10") @Min(value = 1, message = "사이즈는 1 이상이여야 합니다.") Integer size) {
         return new ReadAllItemResponse(this.itemService.readAllItems(page, size));
     }
 
