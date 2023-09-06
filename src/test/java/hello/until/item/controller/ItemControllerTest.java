@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -45,7 +46,7 @@ class ItemControllerTest {
                 .id(1L)
                 .name("테스트 상품")
                 .price(10_000)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().minusDays(1L))
                 .updatedAt(LocalDateTime.now())
                 .build();
 
@@ -99,14 +100,14 @@ class ItemControllerTest {
             int resultIdx = 0;
             int itemsIdx = startIdx;
 
-            for (;resultIdx < size; resultIdx++, itemsIdx++) {
+            for (; resultIdx < size; resultIdx++, itemsIdx++) {
                 String base = String.format("$.data[%d]", resultIdx);
                 resultActions
-                    .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
-                    .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
-                    .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
-                    .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().toString().replaceAll("^0+|0+$", "")))
-                    .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().toString().replaceAll("^0+|0+$", "")));
+                        .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
+                        .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
+                        .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
+                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().toString().replaceAll("^0+|0+$", "")))
+                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().toString().replaceAll("^0+|0+$", "")));
             }
 
             var pageCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -145,7 +146,7 @@ class ItemControllerTest {
             int resultIdx = 0;
             int itemsIdx = startIdx;
 
-            for (;resultIdx < size; resultIdx++, itemsIdx++) {
+            for (; resultIdx < size; resultIdx++, itemsIdx++) {
                 String base = String.format("$.data[%d]", resultIdx);
                 resultActions
                         .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
@@ -170,7 +171,7 @@ class ItemControllerTest {
         void readAllItemNoPage() throws Exception {
             mockMvc
                     .perform(get("/items")
-                        .param("size", String.valueOf(10)))
+                            .param("size", String.valueOf(10)))
                     .andExpect(status().isBadRequest());
         }
 
@@ -191,8 +192,8 @@ class ItemControllerTest {
 
             mockMvc
                     .perform(get("/items")
-                        .param("page", String.valueOf(page))
-                        .param("size", String.valueOf(size)))
+                            .param("page", String.valueOf(page))
+                            .param("size", String.valueOf(size)))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().string("readAllItem.page: 페이지는 0 이상이여야 합니다."));
         }
@@ -211,8 +212,6 @@ class ItemControllerTest {
                     .andExpect(content().string("readAllItem.size: 사이즈는 1 이상이여야 합니다."));
         }
     }
-
-
 
     @Test
     @DisplayName("상품명, 상품 가격을 이용해 상품을 등록 한다.")
@@ -273,5 +272,25 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 조회하면 해당 상품 데이터를 응답한다.")
+    void readExistingItem() throws Exception {
+        // given
+        when(this.itemService.readItem(this.testItem.getId()))
+                .thenReturn(Optional.of(this.testItem));
+
+        // when & then
+        this.mockMvc
+                .perform(get("/items/" + this.testItem.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(this.testItem.getId().toString()))
+                .andExpect(jsonPath("$.data.name").value(this.testItem.getName()))
+                .andExpect(jsonPath("$.data.price").value(this.testItem.getPrice()))
+                .andExpect(jsonPath("$.data.createdAt").value(this.testItem.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.data.updatedAt").value(this.testItem.getUpdatedAt().toString()));
     }
 }
