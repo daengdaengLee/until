@@ -278,7 +278,7 @@ class ItemControllerTest {
     @DisplayName("존재하는 상품 아이디로 조회하면 해당 상품 데이터를 응답한다.")
     void readExistingItem() throws Exception {
         // given
-        when(this.itemService.readItem(this.testItem.getId()))
+        when(this.itemService.readItem(anyLong()))
                 .thenReturn(Optional.of(this.testItem));
 
         // when & then
@@ -292,18 +292,27 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.price").value(this.testItem.getPrice()))
                 .andExpect(jsonPath("$.data.createdAt").value(this.testItem.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.data.updatedAt").value(this.testItem.getUpdatedAt().toString()));
+        this.verifyItemServiceReadItem();
     }
 
     @Test
     @DisplayName("존재하지 않는 상품 아이디로 조회하면 404 에러를 응답한다.")
     void readNotExistingItem() throws Exception {
         // given
-        when(this.itemService.readItem(this.testItem.getId()))
+        when(this.itemService.readItem(anyLong()))
                 .thenReturn(Optional.empty());
 
         // when & then
         this.mockMvc
                 .perform(get("/items/" + this.testItem.getId()))
                 .andExpect(status().isNotFound());
+        this.verifyItemServiceReadItem();
+    }
+
+    private void verifyItemServiceReadItem() {
+        var idCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(this.itemService, times(1)).readItem(idCaptor.capture());
+        var capturedId = idCaptor.getValue();
+        assertThat(capturedId).isEqualTo(this.testItem.getId());
     }
 }
