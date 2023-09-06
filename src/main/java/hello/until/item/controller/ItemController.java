@@ -28,7 +28,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ReadAllItemResponse readAllItem(@RequestParam @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
+    public ReadAllItemResponse readAllItems(@RequestParam @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
                                            @RequestParam @Min(value = 1, message = "사이즈는 1 이상이여야 합니다.") Integer size) {
         return new ReadAllItemResponse(this.itemService.readAllItems(page, size));
     }
