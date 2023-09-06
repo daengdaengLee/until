@@ -293,4 +293,17 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.data.createdAt").value(this.testItem.getCreatedAt().toString()))
                 .andExpect(jsonPath("$.data.updatedAt").value(this.testItem.getUpdatedAt().toString()));
     }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 아이디로 조회하면 404 에러를 응답한다.")
+    void readNotExistingItem() throws Exception {
+        // given
+        when(this.itemService.readItem(this.testItem.getId()))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        this.mockMvc
+                .perform(get("/items/" + this.testItem.getId()))
+                .andExpect(status().isNotFound());
+    }
 }
