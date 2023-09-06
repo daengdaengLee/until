@@ -43,11 +43,15 @@ public class ItemService {
     }
 
     @Transactional
-    public Item updateItem(long id, String name, int price) {
+    public Item updateItem(long id, String name, Integer price) {
         var item = this.itemRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
-        item.setName(name);
-        item.setPrice(price);
+        if (name != null) {
+            item.setName(name);
+        }
+        if (price != null) {
+            item.setPrice(price);
+        }
         this.itemRepository.save(item);
         return item;
     }

@@ -1,6 +1,8 @@
 package hello.until.item.controller;
 
 import hello.until.item.dto.request.CreateItemRequest;
+import hello.until.item.dto.request.UpdateItemRequest;
+import hello.until.item.dto.response.ItemResponse;
 import hello.until.item.dto.response.CreateItemResponse;
 import hello.until.item.dto.response.ReadAllItemResponse;
 import hello.until.item.dto.response.ReadItemResponse;
@@ -20,9 +22,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{id}")
-    public ReadItemResponse readItem(@PathVariable long id) {
+    public ItemResponse readItem(@PathVariable long id) {
         return this.itemService.readItem(id)
-                .map(ReadItemResponse::new)
+                .map(ItemResponse::new)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
@@ -33,10 +35,17 @@ public class ItemController {
     }
 
     @PostMapping
-    public CreateItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
+    public ItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
 
-        return new CreateItemResponse(this.itemService.createItem(name, price));
+        return new ItemResponse(this.itemService.createItem(name, price));
+    }
+
+    @PatchMapping("/{id}")
+    public ItemResponse updateItem(@PathVariable Long id, @RequestBody UpdateItemRequest updateItemRequest) {
+        updateItemRequest.validate();
+        var updatedItem = this.itemService.updateItem(id, updateItemRequest.name(), updateItemRequest.price());
+        return new ItemResponse(updatedItem);
     }
 }
