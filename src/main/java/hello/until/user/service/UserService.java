@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
+import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class UserService {
 		User user = new User();
 		user.setEmail(email);
 		user.setPassword(password);
+		user.setRole(Role.BUYER);
 		userRepository.save(user);
 		
 	}
