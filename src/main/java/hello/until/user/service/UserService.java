@@ -23,14 +23,11 @@ public class UserService {
 	@Transactional 
 	public void createUser(String email, String password) {
 		
-		LocalDateTime currentDateTime = LocalDateTime.now();
 		validateUser(email); 
 			
 		User user = new User();
 		user.setEmail(email);
 		user.setPassword(password);
-		user.setCreatedAt(currentDateTime);
-		user.setUpdatedAt(currentDateTime);
 		userRepository.save(user);
 		
 	}
@@ -39,7 +36,7 @@ public class UserService {
 		Optional<User> user = userRepository.findByEmail(email);
 		
 		if(user.isPresent())
-			throw new IllegalStateException("이미 가입 된 회원 메일입니다.");
+			throw new CustomException(ExceptionCode.DUPLICATE_EMAIL_USER_TO_CREATE);
 	}
 
 	public User updateUser(long userId, String email, String password){

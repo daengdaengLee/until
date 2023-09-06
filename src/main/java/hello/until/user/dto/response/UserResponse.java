@@ -1,9 +1,9 @@
 package hello.until.user.dto.response;
 
+import java.time.LocalDateTime;
+
 import hello.until.user.entity.User;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 public class UserResponse {
