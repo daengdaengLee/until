@@ -42,7 +42,8 @@ public class UserController {
 		User user = userService.updateUser(
 				id,
 				updateUserRequest.email(),
-				updateUserRequest.password());
+				updateUserRequest.password(),
+				updateUserRequest.role());
 		return new UserResponse(user);
 	}
 

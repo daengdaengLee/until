@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 
 @DataJpaTest
@@ -30,6 +31,7 @@ public class UserRepositoryTest {
         user.setId(1L);
         user.setEmail("test@test.com");
         user.setPassword("12345678");
+        user.setRole(Role.BUYER);
         LocalDateTime expected = LocalDateTime.now().plusSeconds(1);
         
         // when
@@ -38,8 +40,11 @@ public class UserRepositoryTest {
         // then
         assertEquals(dbUser.getEmail(), user.getEmail());
         assertEquals(dbUser.getPassword(), user.getPassword());
+        assertEquals(dbUser.getRole(), user.getRole());
+        
         assertThat(dbUser.getCreatedAt()).isBefore(expected);
         assertThat(dbUser.getUpdatedAt()).isBefore(expected);
+        
     }
 
     @Test
@@ -53,8 +58,6 @@ public class UserRepositoryTest {
         user.setPassword("12345678");
         User dbUser = userRepository.save(user);
         
-        LocalDateTime expected = LocalDateTime.now().plusSeconds(1);
-        
         int delaySeconds = 3;
         Awaitility.await()
                 .pollDelay(Duration.ofSeconds(delaySeconds))
@@ -65,11 +68,14 @@ public class UserRepositoryTest {
         
         // when
         dbUser.updateEmail("test2@test.com");
+        dbUser.setRole(Role.SELLER);
         User savedUser = userRepository.saveAndFlush(dbUser);
 
         // then
         assertEquals(dbUser.getEmail(), savedUser.getEmail());
         assertEquals(dbUser.getPassword(), savedUser.getPassword());
+        assertEquals(dbUser.getRole(), savedUser.getRole());
+        
         
         assertThat(savedUser.getUpdatedAt()).isAfterOrEqualTo(expectedUpdate1);
         assertThat(savedUser.getUpdatedAt()).isBeforeOrEqualTo(expectedUpdate2);
