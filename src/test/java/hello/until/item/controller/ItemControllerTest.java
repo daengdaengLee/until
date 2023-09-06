@@ -77,7 +77,7 @@ class ItemControllerTest {
         assertThat(testItem.getPrice().equals(passedPrice)).isTrue();
     }
 
-    @DisplayName("상품명 없이 상품을 등록 한다.")
+    @DisplayName("상품명 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoName() throws Exception {
         mockMvc
@@ -87,7 +87,7 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("상품 가격 없이 상품을 등록 한다.")
+    @DisplayName("상품 가격 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoPrice() throws Exception {
         mockMvc
@@ -97,7 +97,7 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("상품명과 상품 가격 없이 상품을 등록 한다.")
+    @DisplayName("상품명과 상품 가격 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoNameAndPrice() throws Exception {
         mockMvc
