@@ -1,28 +1,24 @@
 package hello.until.user.controller;
 
-import hello.until.user.dto.request.UpdateUserRequest;
-import hello.until.user.dto.response.UserResponse;
-import hello.until.user.entity.User;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.user.dto.request.CreateUserRequest;
-import hello.until.user.dto.response.GetUserResponse;
+import hello.until.user.dto.request.UpdateUserRequest;
+import hello.until.user.dto.response.UserResponse;
+import hello.until.user.entity.User;
 import hello.until.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,24 +41,25 @@ public class UserController {
 		User user = userService.updateUser(
 				id,
 				updateUserRequest.email(),
-				updateUserRequest.password());
+				updateUserRequest.password(),
+				updateUserRequest.role());
 		return new UserResponse(user);
 	}
 
 	@GetMapping("/{id}")
-	public GetUserResponse getUserById(@PathVariable long id) {
+	public UserResponse getUserById(@PathVariable long id) {
 
 		return userService.getUserById(id)
-				.map(GetUserResponse::new)
+				.map(UserResponse::new)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
 
 	}
 	
 	@GetMapping("/getUsers")
-	public  Page<GetUserResponse> getUsers(Optional<Integer> page) {
+	public  Page<UserResponse> getUsers(Optional<Integer> page) {
 		Pageable pageable  = PageRequest.of(page.isPresent() ? page.get() : 0, 5);
         Page<User> userPage = userService.getUsers(pageable);
-        return userPage.map(user -> new GetUserResponse(user));
+        return userPage.map(user -> new UserResponse(user));
 
 	}
 

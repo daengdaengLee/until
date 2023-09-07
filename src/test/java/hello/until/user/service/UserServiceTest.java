@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
 
@@ -45,6 +45,7 @@ public class UserServiceTest {
 	    testUser.setId(1L);
 	    testUser.setEmail("test@test.com");
 	    testUser.setPassword("12341234");
+	    testUser.setRole(Role.BUYER);
 	}
 
 	@Test
@@ -62,6 +63,7 @@ public class UserServiceTest {
 	        User savedUser = invocation.getArgument(0);
 	        assertEquals(email, savedUser.getEmail()); 
 	        assertEquals(password, savedUser.getPassword()); 
+	        
 	        return testUser; 
 	    });
 		userService.createUser(email, password);
