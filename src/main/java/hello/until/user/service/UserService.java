@@ -1,10 +1,10 @@
 package hello.until.user.service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
-
+	
+	private final BCryptPasswordEncoder passwordEncoder;
+	
 	@Transactional
 	public void createUser(String email, String password) {
 
@@ -28,7 +30,7 @@ public class UserService {
 
 		User user = new User();
 		user.setEmail(email);
-		user.setPassword(password);
+		user.setPassword(passwordEncoder.encode(password));
 		user.setRole(Role.BUYER);
 		userRepository.save(user);
 
@@ -45,7 +47,7 @@ public class UserService {
 		User user = this.getUserById(userId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_UPDATE));
 
 		user.updateEmail(email);
-		user.updatePassword(password);
+		user.updatePassword(passwordEncoder.encode(password));
 		user.updateRole(role);
 
 		return userRepository.save(user);

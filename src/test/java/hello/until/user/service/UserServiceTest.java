@@ -16,10 +16,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
@@ -32,14 +34,18 @@ public class UserServiceTest {
 	private UserRepository userRepository;
 
 	private UserService userService;
-
+	
+	private BCryptPasswordEncoder passwordEncoder;
+	
 	private User testUser;
 	
 	private Page<User> testUsers;
 	
 	@BeforeEach
 	void beforeEach() {
-		userService = new UserService(userRepository);
+		
+	    passwordEncoder = new BCryptPasswordEncoder();
+		userService = new UserService(userRepository, passwordEncoder);
 		
 	    testUser = new User(); 
 	    testUser.setId(1L);
@@ -59,17 +65,24 @@ public class UserServiceTest {
 	    testUser.setEmail(email);
 	    testUser.setPassword(password);
 		
-		Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(invocation -> {
-	        User savedUser = invocation.getArgument(0);
-	        assertEquals(email, savedUser.getEmail()); 
-	        assertEquals(password, savedUser.getPassword()); 
-	        
-	        return testUser; 
-	    });
+	    //given
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(testUser);
+
+		//when
 		userService.createUser(email, password);
 
+		//then
+		var userCaptor = ArgumentCaptor.forClass(User.class);
+	    Mockito.verify(this.userRepository, times(1)).save(userCaptor.capture());
+	    var passedItem = userCaptor.getValue();
+		
+	    assertThat(passedItem.getEmail()).isEqualTo(email);
+	    assertThat(passwordEncoder.matches(password, passedItem.getPassword())).isTrue();
+	    
 		Mockito.verify(this.userRepository, Mockito.times(1)).save(Mockito.any(User.class));
 
+		
+		
 	}
 	
 	@Test
