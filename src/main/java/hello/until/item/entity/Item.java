@@ -1,5 +1,6 @@
 package hello.until.item.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import jakarta.persistence.*;
@@ -24,9 +25,11 @@ public class Item {
     private Long id;
     private String name;
     private Integer price;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @Column(updatable = false, nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
