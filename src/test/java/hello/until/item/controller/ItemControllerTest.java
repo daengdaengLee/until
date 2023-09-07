@@ -107,8 +107,8 @@ class ItemControllerTest {
                         .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
                         .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
                         .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
-                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().toString().replaceAll("^0+|0+$", "")))
-                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().toString().replaceAll("^0+|0+$", "")));
+                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().format(dateTimeFormatter)))
+                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().format(dateTimeFormatter)));
             }
 
             var pageCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -153,8 +153,8 @@ class ItemControllerTest {
                         .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
                         .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
                         .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
-                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().toString().replaceAll("^0+|0+$", "")))
-                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().toString().replaceAll("^0+|0+$", "")));
+                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().format(dateTimeFormatter)))
+                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().format(dateTimeFormatter)));
             }
 
             var pageCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -168,21 +168,97 @@ class ItemControllerTest {
         }
 
         @Test
-        @DisplayName("페이지 없이 사이즈만으로 상품 목록을 조회하면 400을 반환한다.")
+        @DisplayName("페이지와 없이 상품 목록을 조회하면 페이지 0을 기준으로 목록을 조회하여 반환한다.")
         void readAllItemNoPage() throws Exception {
-            mockMvc
-                    .perform(get("/items")
-                            .param("size", String.valueOf(10)))
-                    .andExpect(status().isBadRequest());
+            // given
+            int page = 0;
+            int size = 10;
+
+            PageRequest pageRequest = PageRequest.of(page, size);
+            int startIdx = (int) pageRequest.getOffset();
+            int endIdx = Math.min(startIdx + pageRequest.getPageSize(), testItems.size());
+
+            when(itemService.readAllItems(page, size))
+                    .thenReturn(this.testItems.subList(startIdx, endIdx));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(get("/items")
+                    .param("size", String.valueOf(size)));
+
+            // then
+            // httpStatus 와 contentType 검증
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+            // data 검증
+            int resultIdx = 0;
+            int itemsIdx = startIdx;
+
+            for (; resultIdx < size; resultIdx++, itemsIdx++) {
+                String base = String.format("$.data[%d]", resultIdx);
+                resultActions
+                        .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
+                        .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
+                        .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
+                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().format(dateTimeFormatter)))
+                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().format(dateTimeFormatter)));
+            }
+
+            var pageCaptor = ArgumentCaptor.forClass(Integer.class);
+            var sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+            verify(itemService, times(1)).readAllItems(pageCaptor.capture(), sizeCaptor.capture());
+
+            var passedPage = pageCaptor.getValue();
+            var passedSize = sizeCaptor.getValue();
+            assertThat(passedPage.equals(page)).isTrue();
+            assertThat(passedSize.equals(size)).isTrue();
         }
 
         @Test
-        @DisplayName("사이즈 없이 페이지만으로 상품 목록을 조회하면 400을 반환한다.")
+        @DisplayName("사이즈 없이 상품 목록을 조회하면 사이즈 10을 기준으로 목록을 조회하여 반환한다.")
         void readAllItemNoSize() throws Exception {
-            mockMvc
-                    .perform(get("/items")
-                            .param("page", String.valueOf(0)))
-                    .andExpect(status().isBadRequest());
+            // given
+            int page = 0;
+            int size = 10;
+
+            PageRequest pageRequest = PageRequest.of(page, size);
+            int startIdx = (int) pageRequest.getOffset();
+            int endIdx = Math.min(startIdx + pageRequest.getPageSize(), testItems.size());
+
+            when(itemService.readAllItems(page, size))
+                    .thenReturn(this.testItems.subList(startIdx, endIdx));
+
+            // when
+            ResultActions resultActions = mockMvc.perform(get("/items")
+                    .param("page", String.valueOf(page)));
+
+            // then
+            // httpStatus 와 contentType 검증
+            resultActions
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+            // data 검증
+            int resultIdx = 0;
+            int itemsIdx = startIdx;
+
+            for (; resultIdx < size; resultIdx++, itemsIdx++) {
+                String base = String.format("$.data[%d]", resultIdx);
+                resultActions
+                        .andExpect(jsonPath(base + ".id").value(this.testItems.get(itemsIdx).getId().toString()))
+                        .andExpect(jsonPath(base + ".name").value(this.testItems.get(itemsIdx).getName()))
+                        .andExpect(jsonPath(base + ".price").value(this.testItems.get(itemsIdx).getPrice()))
+                        .andExpect(jsonPath(base + ".createdAt").value(this.testItems.get(itemsIdx).getCreatedAt().format(dateTimeFormatter)))
+                        .andExpect(jsonPath(base + ".updatedAt").value(this.testItems.get(itemsIdx).getUpdatedAt().format(dateTimeFormatter)));
+            }
+
+            var pageCaptor = ArgumentCaptor.forClass(Integer.class);
+            var sizeCaptor = ArgumentCaptor.forClass(Integer.class);
+            verify(itemService, times(1)).readAllItems(pageCaptor.capture(), sizeCaptor.capture());
+
+            var passedPage = pageCaptor.getValue();
+            var passedSize = sizeCaptor.getValue();
+            assertThat(passedPage.equals(page)).isTrue();
+            assertThat(passedSize.equals(size)).isTrue();
         }
 
         @Test
@@ -196,21 +272,21 @@ class ItemControllerTest {
                             .param("page", String.valueOf(page))
                             .param("size", String.valueOf(size)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string("readAllItem.page: 페이지는 0 이상이여야 합니다."));
+                    .andExpect(content().string("readAllItems.page: 페이지는 0 이상이여야 합니다."));
         }
 
         @Test
         @DisplayName("사이즈를 0 으로 상품 목록을 조회하면 400과 실패 메시지를 반환한다.")
         void readAllItemSizeIsInvalid() throws Exception {
-            int page = -1;
-            int size = 10;
+            int page = 0;
+            int size = 0;
 
             mockMvc
                     .perform(get("/items")
                             .param("page", String.valueOf(page))
                             .param("size", String.valueOf(size)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string("readAllItem.size: 사이즈는 1 이상이여야 합니다."));
+                    .andExpect(content().string("readAllItems.size: 사이즈는 1 이상이여야 합니다."));
         }
     }
 
