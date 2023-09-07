@@ -41,22 +41,13 @@ public class UserService {
 			throw new CustomException(ExceptionCode.DUPLICATE_EMAIL_USER_TO_CREATE);
 	}
 
-	public User updateUser(long userId, String email, String password, String role) {
+	public User updateUser(long userId, String email, String password, Role role) {
 		User user = this.getUserById(userId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_UPDATE));
 
 		user.updateEmail(email);
 		user.updatePassword(password);
+		user.updateRole(role);
 
-		if (role != null && !role.equals("")) {
-			Role updateRole;
-			try {
-				updateRole = Role.valueOf(role.toUpperCase());
-			} catch (IllegalArgumentException ex) {
-				throw new CustomException(ExceptionCode.NO_USER_ROLE_TO_UPDATE);
-			}
-			user.updateRole(updateRole);
-		}
-		
 		return userRepository.save(user);
 	}
 

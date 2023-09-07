@@ -17,7 +17,6 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.user.dto.request.CreateUserRequest;
 import hello.until.user.dto.request.UpdateUserRequest;
-import hello.until.user.dto.response.GetUserResponse;
 import hello.until.user.dto.response.UserResponse;
 import hello.until.user.entity.User;
 import hello.until.user.service.UserService;
@@ -48,19 +47,19 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
-	public GetUserResponse getUserById(@PathVariable long id) {
+	public UserResponse getUserById(@PathVariable long id) {
 
 		return userService.getUserById(id)
-				.map(GetUserResponse::new)
+				.map(UserResponse::new)
 				.orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
 
 	}
 	
 	@GetMapping("/getUsers")
-	public  Page<GetUserResponse> getUsers(Optional<Integer> page) {
+	public  Page<UserResponse> getUsers(Optional<Integer> page) {
 		Pageable pageable  = PageRequest.of(page.isPresent() ? page.get() : 0, 5);
         Page<User> userPage = userService.getUsers(pageable);
-        return userPage.map(user -> new GetUserResponse(user));
+        return userPage.map(user -> new UserResponse(user));
 
 	}
 

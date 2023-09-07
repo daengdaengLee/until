@@ -5,6 +5,6 @@ import hello.until.user.constant.Role;
 public record UpdateUserRequest(
         String email,
         String password,
-        String role){
+        Role role){
 
 }
