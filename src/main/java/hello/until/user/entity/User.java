@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import hello.until.user.constant.Role;
 import jakarta.persistence.Column;
@@ -46,9 +47,9 @@ public class User {
             this.email = email;
         }
     }
-    public void updatePassword(String password){
+    public void updatePassword(String password, BCryptPasswordEncoder passwordEncoder){
         if(password != null){
-            this.password = password;
+            this.password = passwordEncoder.encode(password);
         }
     }
 

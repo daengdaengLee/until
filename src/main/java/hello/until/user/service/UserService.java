@@ -47,7 +47,7 @@ public class UserService {
 		User user = this.getUserById(userId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_UPDATE));
 
 		user.updateEmail(email);
-		user.updatePassword(passwordEncoder.encode(password));
+		user.updatePassword(password, passwordEncoder);
 		user.updateRole(role);
 
 		return userRepository.save(user);
