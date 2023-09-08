@@ -27,8 +27,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public ReadAllItemResponse readAllItems(@RequestParam(required = false, defaultValue = "0") @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
-                                            @RequestParam(required = false, defaultValue = "10") @Min(value = 1, message = "사이즈는 1 이상이여야 합니다.") Integer size) {
+    public ReadAllItemResponse readAllItems(
+            @RequestParam(required = false, defaultValue = "0")
+            @Min(value = 0, message = "페이지는 0 이상이여야 합니다.") Integer page,
+            @RequestParam(required = false, defaultValue = "10")
+            @Min(value = 1, message = "사이즈는 1 이상이여야 합니다.") Integer size) {
         return new ReadAllItemResponse(this.itemService.readAllItems(page, size));
     }
 
@@ -45,5 +48,10 @@ public class ItemController {
         updateItemRequest.validate();
         var updatedItem = this.itemService.updateItem(id, updateItemRequest.name(), updateItemRequest.price());
         return new ItemResponse(updatedItem);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteItem(@PathVariable Long id) {
+        this.itemService.deleteItem(id);
     }
 }
