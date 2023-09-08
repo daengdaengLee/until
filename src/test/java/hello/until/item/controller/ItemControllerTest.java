@@ -1,7 +1,10 @@
 package hello.until.item.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hello.until.exception.CustomException;
+import hello.until.exception.ExceptionCode;
 import hello.until.item.dto.request.CreateItemRequest;
+import hello.until.item.dto.request.UpdateItemRequest;
 import hello.until.item.entity.Item;
 import hello.until.item.service.ItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +29,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ItemController.class)
@@ -395,5 +397,181 @@ class ItemControllerTest {
         verify(this.itemService, times(1)).readItem(idCaptor.capture());
         var capturedId = idCaptor.getValue();
         assertThat(capturedId).isEqualTo(this.testItem.getId());
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 상품의 이름 수정을 요청하면 수정한 상품 데이터를 응답한다.")
+    void updateItemName() throws Exception {
+        // given
+        var updatedName = this.testItem.getName() + " (수정됨)";
+        var updatedItem = this.testItem.toBuilder().name(updatedName).build();
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(updatedItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(updatedName, null))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(updatedItem.getId().toString()))
+                .andExpect(jsonPath("$.data.name").value(updatedItem.getName()))
+                .andExpect(jsonPath("$.data.price").value(updatedItem.getPrice()))
+                .andExpect(jsonPath("$.data.createdAt")
+                        .value(updatedItem.getCreatedAt().format(this.dateTimeFormatter)))
+                .andExpect(jsonPath("$.data.updatedAt")
+                        .value(updatedItem.getUpdatedAt().format(this.dateTimeFormatter)));
+        this.verifyItemServiceUpdateItem(updatedName, null);
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 상품의 가격 수정을 요청하면 수정한 상품 데이터를 응답한다.")
+    void updateItemPrice() throws Exception {
+        // given
+        var updatedPrice = this.testItem.getPrice() + 10_000;
+        var updatedItem = this.testItem.toBuilder().price(updatedPrice).build();
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(updatedItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(null, updatedPrice))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(updatedItem.getId().toString()))
+                .andExpect(jsonPath("$.data.name").value(updatedItem.getName()))
+                .andExpect(jsonPath("$.data.price").value(updatedItem.getPrice()))
+                .andExpect(jsonPath("$.data.createdAt")
+                        .value(updatedItem.getCreatedAt().format(this.dateTimeFormatter)))
+                .andExpect(jsonPath("$.data.updatedAt")
+                        .value(updatedItem.getUpdatedAt().format(this.dateTimeFormatter)));
+        this.verifyItemServiceUpdateItem(null, updatedPrice);
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 상품의 이름, 가격 수정을 요청하면 수정한 상품 데이터를 응답한다.")
+    void updateItem() throws Exception {
+        // given
+        var updatedName = this.testItem.getName() + " (수정됨)";
+        var updatedPrice = this.testItem.getPrice() + 10_000;
+        var updatedItem = this.testItem.toBuilder().name(updatedName).price(updatedPrice).build();
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(updatedItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(updatedName, updatedPrice))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(updatedItem.getId().toString()))
+                .andExpect(jsonPath("$.data.name").value(updatedItem.getName()))
+                .andExpect(jsonPath("$.data.price").value(updatedItem.getPrice()))
+                .andExpect(jsonPath("$.data.createdAt")
+                        .value(updatedItem.getCreatedAt().format(this.dateTimeFormatter)))
+                .andExpect(jsonPath("$.data.updatedAt")
+                        .value(updatedItem.getUpdatedAt().format(this.dateTimeFormatter)));
+        this.verifyItemServiceUpdateItem(updatedName, updatedPrice);
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 빈 내용으로 수정을 요청하면 400 을 응답한다.")
+    void updateItemEmpty() throws Exception {
+        // given
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(this.testItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(null, null))))
+                .andExpect(status().isBadRequest());
+        verify(this.itemService, never()).updateItem(anyLong(), nullable(String.class), nullable(Integer.class));
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 상품의 이름 수정을 빈 문자열로 요청하면 400 예외를 응답한다.")
+    void updateItemNameEmpty() throws Exception {
+        // given
+        var updatedName = "";
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(this.testItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(updatedName, null))))
+                .andExpect(status().isBadRequest());
+        verify(this.itemService, never()).updateItem(anyLong(), nullable(String.class), nullable(Integer.class));
+    }
+
+    @Test
+    @DisplayName("존재하는 상품 아이디로 상품의 가격 수정을 음수로 요청하면 400 예외를 응답한다.")
+    void updateItemPriceNegative() throws Exception {
+        // given
+        var updatedPrice = -10_000;
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenReturn(this.testItem);
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(null, updatedPrice))))
+                .andExpect(status().isBadRequest());
+        verify(this.itemService, never()).updateItem(anyLong(), nullable(String.class), nullable(Integer.class));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 상품 아이디로 수정을 요청하면 400 예외를 응답한다.")
+    void updateNotExistingItem() throws Exception {
+        // given
+        var updatedName = this.testItem.getName() + " (수정됨)";
+        var updatedPrice = this.testItem.getPrice() + 10_000;
+        when(this.itemService.updateItem(anyLong(), nullable(String.class), nullable(Integer.class)))
+                .thenThrow(new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
+
+        // when & then
+        this.mockMvc
+                .perform(patch("/items/" + this.testItem.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsBytes(
+                                new UpdateItemRequest(updatedName, updatedPrice))))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(ExceptionCode.NO_ITEM_TO_UPDATE.getMessage()));
+        this.verifyItemServiceUpdateItem(updatedName, updatedPrice);
+    }
+
+    private void verifyItemServiceUpdateItem(String name, Integer price) {
+        var idCaptor = ArgumentCaptor.forClass(Long.class);
+        var nameCaptor = ArgumentCaptor.forClass(String.class);
+        var priceCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(this.itemService, times(1))
+                .updateItem(idCaptor.capture(), nameCaptor.capture(), priceCaptor.capture());
+
+        var capturedId = idCaptor.getValue();
+        assertThat(capturedId).isEqualTo(this.testItem.getId());
+
+        var capturedName = nameCaptor.getValue();
+        assertThat(capturedName).isEqualTo(name);
+
+        var capturedPrice = priceCaptor.getValue();
+        assertThat(capturedPrice).isEqualTo(price);
     }
 }
