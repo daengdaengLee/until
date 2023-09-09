@@ -39,8 +39,9 @@ public class ItemController {
     public ItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
+        Long userId = createItemRequest.userId();
 
-        return new ItemResponse(this.itemService.createItem(name, price));
+        return new ItemResponse(this.itemService.createItem(name, price, userId));
     }
 
     @PatchMapping("/{id}")
