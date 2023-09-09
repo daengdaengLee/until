@@ -4,6 +4,9 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.item.entity.Item;
 import hello.until.item.repository.ItemRepository;
+import hello.until.user.constant.Role;
+import hello.until.user.entity.User;
+import hello.until.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,20 +32,29 @@ import static org.mockito.Mockito.*;
 class ItemServiceTest {
     @Mock
     private ItemRepository itemRepository;
+    @Mock
+    private UserRepository userRepository;
     private ItemService itemService;
 
     private Item testItem;
 
     @BeforeEach
     void beforeEach() {
-        this.itemService = new ItemService(this.itemRepository);
+        this.itemService = new ItemService(this.itemRepository, this.userRepository);
 
-        this.testItem = Item.builder()
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+        user.setPassword("12345678");
+        user.setRole(Role.BUYER);
+
+        testItem = Item.builder()
                 .id(1L)
                 .name("테스트 상품")
                 .price(10_000)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .user(user)
                 .build();
     }
 
@@ -144,11 +156,17 @@ class ItemServiceTest {
         // given
         String name = this.testItem.getName();
         Integer price = this.testItem.getPrice();
+        Long userId = this.testItem.getUser().getId();
 
+        User user = new User();
+        user.setId(userId);
+
+        when(this.userRepository.existsById(userId)).thenReturn(true);
+        when(this.userRepository.getReferenceById(userId)).thenReturn(user);
         when(this.itemRepository.save(any(Item.class))).thenReturn(this.testItem);
 
         // when
-        Item item = itemService.createItem(name, price);
+        Item item = itemService.createItem(name, price, userId);
 
         // then
         var itemCaptor = ArgumentCaptor.forClass(Item.class);
@@ -156,9 +174,29 @@ class ItemServiceTest {
         var passedItem = itemCaptor.getValue();
         assertThat(name.equals(passedItem.getName())).isTrue();
         assertThat(price.equals(passedItem.getPrice())).isTrue();
+        assertThat(userId.equals(passedItem.getUser().getId())).isTrue();
 
         assertThat(name.equals(item.getName())).isTrue();
         assertThat(price.equals(item.getPrice())).isTrue();
+    }
+
+    @Test
+    @DisplayName("등록되지 않은 회원 ID로 상품명, 상품 가격으로 상품을 등록하면 회원 정보가 없다는 CustomException 이 발생한다.")
+    void createItemNotJoinUserId() {
+        // given
+        String name = this.testItem.getName();
+        Integer price = this.testItem.getPrice();
+        Long userId = this.testItem.getUser().getId();
+
+        when(this.userRepository.existsById(userId)).thenReturn(false);
+
+        // then
+        var ex = catchThrowable(() -> itemService.createItem(name, price, userId));
+
+        // then
+        assertThat(ex).isInstanceOf(CustomException.class);
+        var code = ((CustomException) ex).getCode();
+        assertThat(code).isEqualTo(ExceptionCode.NO_USER_TO_GET);
     }
 
     @Test
