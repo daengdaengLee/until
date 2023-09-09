@@ -4,6 +4,8 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.item.entity.Item;
 import hello.until.item.repository.ItemRepository;
+import hello.until.user.entity.User;
+import hello.until.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ItemService {
     private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     public Optional<Item> readItem(long id) {
         return this.itemRepository.findById(id);
@@ -33,10 +36,17 @@ public class ItemService {
     }
 
     @Transactional
-    public Item createItem(String name, Integer price) {
+    public Item createItem(String name, Integer price, Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ExceptionCode.NO_USER_TO_GET);
+        }
+
+        User userProxy = userRepository.getReferenceById(userId);
+
         Item item = Item.builder()
                 .name(name)
                 .price(price)
+                .user(userProxy)
                 .build();
 
         return itemRepository.save(item);
