@@ -11,3 +11,10 @@ spring:
   h2:
     console:
       enabled: true
+
+application:  
+  security:
+    jwt:
+      #secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: A+7z32MPi+W7O53ZsJ98gY3zKOC8AABTdN3/oa/0XdFG+MIGQkE5D+hlIlStxSSm
+      expiration: 1800000 # 30 minutes

@@ -19,9 +19,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import hello.until.jwt.JwtService;
 import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
@@ -36,6 +38,10 @@ public class UserServiceTest {
 	
 	private PasswordEncoder passwordEncoder;
 	
+	private JwtService jwtService;
+	
+    private AuthenticationManager authenticationManager;
+	
 	private User testUser;
 	
 	private Page<User> testUsers;
@@ -44,7 +50,7 @@ public class UserServiceTest {
 	void beforeEach() {
 		
 	    passwordEncoder = new BCryptPasswordEncoder();
-		userService = new UserService(userRepository, passwordEncoder);
+		userService = new UserService(userRepository, passwordEncoder, jwtService, authenticationManager );
 		
 	    testUser = new User(); 
 	    testUser.setId(1L);

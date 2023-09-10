@@ -43,6 +43,7 @@ import hello.until.item.dto.request.CreateItemRequest;
 import hello.until.item.dto.request.UpdateItemRequest;
 import hello.until.item.entity.Item;
 import hello.until.item.service.ItemService;
+import hello.until.jwt.JwtService;
 
 @WebMvcTest(ItemController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -57,6 +58,9 @@ class ItemControllerTest {
     private Item testItem;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+    @MockBean
+    private JwtService jwtService;
+    
     @BeforeEach
     void beforeEach() {
         testItem = Item.builder()
