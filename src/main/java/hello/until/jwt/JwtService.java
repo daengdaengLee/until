@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
@@ -34,7 +33,7 @@ public class JwtService {
 				.setSubject(userDetails.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))	
-				.signWith(getSignInKey(), SignatureAlgorithm.HS256)
+				.signWith(getSignInKey())
 				.compact();
 	}
 	

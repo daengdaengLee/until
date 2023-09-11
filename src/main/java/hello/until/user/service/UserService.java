@@ -36,7 +36,7 @@ public class UserService {
 		authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 		
-		User user = userRepository.findByEmail(email).orElseThrow();
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
 		PrincipalDetails principalDetails = new PrincipalDetails(user);
 		String jwtToken = jwtService.generateToken(principalDetails);
 
