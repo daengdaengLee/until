@@ -8,7 +8,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import hello.until.user.entity.User;
+import lombok.Getter;
 
+@Getter
 public class PrincipalDetails implements UserDetails {
 
 	private User user;
@@ -17,6 +19,8 @@ public class PrincipalDetails implements UserDetails {
 		this.user = user;
 	}
 
+	
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority(user.getRole().name()));
