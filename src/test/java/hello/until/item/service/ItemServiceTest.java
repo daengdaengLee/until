@@ -196,7 +196,7 @@ class ItemServiceTest {
         // then
         assertThat(ex).isInstanceOf(CustomException.class);
         var code = ((CustomException) ex).getCode();
-        assertThat(code).isEqualTo(ExceptionCode.NO_USER_TO_GET);
+        assertThat(code).isEqualTo(ExceptionCode.NO_USER_TO_CREATE_ITEM);
     }
 
     @Test
