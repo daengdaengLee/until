@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.user.dto.request.CreateUserRequest;
+import hello.until.user.dto.request.LoginRequest;
 import hello.until.user.dto.request.UpdateUserRequest;
+import hello.until.user.dto.response.LoginResponse;
 import hello.until.user.dto.response.UserResponse;
 import hello.until.user.entity.User;
 import hello.until.user.service.UserService;
@@ -30,6 +32,11 @@ public class UserController {
 
 	private final UserService userService;
 
+	@PostMapping("/login")
+	public LoginResponse authenticate(@RequestBody @Valid LoginRequest loginRequest) {
+		return userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+	}
+	
 	@PostMapping("/join")
 	public void join(@RequestBody @Valid CreateUserRequest createUserRequest) {
 		userService.createUser(createUserRequest.getEmail(), createUserRequest.getPassword());
