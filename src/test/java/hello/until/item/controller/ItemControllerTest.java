@@ -20,6 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hello.until.item.dto.request.CreateItemRequest;
+import hello.until.item.entity.Item;
+import hello.until.item.service.ItemService;
+import hello.until.user.constant.Role;
+import hello.until.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,14 +41,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
-import hello.until.item.dto.request.CreateItemRequest;
 import hello.until.item.dto.request.UpdateItemRequest;
-import hello.until.item.entity.Item;
-import hello.until.item.service.ItemService;
 import hello.until.jwt.JwtService;
 
 @WebMvcTest(ItemController.class)
@@ -60,15 +61,22 @@ class ItemControllerTest {
 
     @MockBean
     private JwtService jwtService;
-    
+
     @BeforeEach
     void beforeEach() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+        user.setPassword("12345678");
+        user.setRole(Role.BUYER);
+
         testItem = Item.builder()
                 .id(1L)
                 .name("테스트 상품")
                 .price(10_000)
                 .createdAt(LocalDateTime.now().minusDays(1L))
                 .updatedAt(LocalDateTime.now())
+                .user(user)
                 .build();
     }
 
@@ -313,14 +321,14 @@ class ItemControllerTest {
     @DisplayName("상품명, 상품 가격을 이용해 상품을 등록 한다.")
     void createItem() throws Exception {
         // given
-        when(itemService.createItem(testItem.getName(), testItem.getPrice()))
+        when(itemService.createItem(testItem.getName(), testItem.getPrice(), testItem.getUser().getId()))
                 .thenReturn(testItem);
 
         // when & then
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), testItem.getUser().getId()))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.id").value(testItem.getId().toString()))
@@ -334,12 +342,15 @@ class ItemControllerTest {
         // service 호출 시 name, price 가 동일하게 전달되는지 검증
         var nameCaptor = ArgumentCaptor.forClass(String.class);
         var priceCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture());
+        var userIdCaptor = ArgumentCaptor.forClass(Long.class);
+        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture(), userIdCaptor.capture());
 
         var passedName = nameCaptor.getValue();
         var passedPrice = priceCaptor.getValue();
+        var passedUserId = userIdCaptor.getValue();
         assertThat(testItem.getName().equals(passedName)).isTrue();
         assertThat(testItem.getPrice().equals(passedPrice)).isTrue();
+        assertThat(testItem.getUser().getId().equals(passedUserId)).isTrue();
     }
 
     @DisplayName("상품명 없이 상품을 등록하면 400을 반환한다.")
@@ -348,7 +359,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, testItem.getPrice(), testItem.getUser().getId()))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -358,7 +369,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), null))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), null, testItem.getUser().getId()))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -368,7 +379,17 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null, testItem.getUser().getId()))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("회원 ID 없이 상품을 등록하면 400을 반환한다.")
+    @Test
+    void createItemNoUserId() throws Exception {
+        mockMvc
+                .perform(post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), null))))
                 .andExpect(status().isBadRequest());
     }
 
