@@ -46,7 +46,7 @@ class ItemServiceTest {
         user.setId(1L);
         user.setEmail("test@test.com");
         user.setPassword("12345678");
-        user.setRole(Role.BUYER);
+        user.setRole(Role.SELLER);
 
         testItem = Item.builder()
                 .id(1L)

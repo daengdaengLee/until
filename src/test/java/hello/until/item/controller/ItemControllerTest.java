@@ -68,7 +68,7 @@ class ItemControllerTest {
                 .id(1L)
                 .email("test@test.com")
                 .password("12345678")
-                .role(Role.BUYER)
+                .role(Role.SELLER)
                 .build();
 
         testItem = Item.builder()
