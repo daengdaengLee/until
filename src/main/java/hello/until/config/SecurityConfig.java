@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import hello.until.auth.CustomAuthenticationFilter;
 import hello.until.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	
 	private final AuthenticationProvider authenticationProvider;
-	
+	private final CustomAuthenticationFilter customAuthenticationFilter;
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -30,7 +31,8 @@ public class SecurityConfig {
 						(sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests((authorize) -> authorize.anyRequest().permitAll())
 				.authenticationProvider(authenticationProvider)
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilter(customAuthenticationFilter);
 		return http.build();
 	}
 }
