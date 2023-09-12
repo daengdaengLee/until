@@ -64,11 +64,12 @@ class ItemControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        User user = new User();
-        user.setId(1L);
-        user.setEmail("test@test.com");
-        user.setPassword("12345678");
-        user.setRole(Role.BUYER);
+        User user = User.builder()
+                .id(1L)
+                .email("test@test.com")
+                .password("12345678")
+                .role(Role.BUYER)
+                .build();
 
         testItem = Item.builder()
                 .id(1L)
