@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:until;NON_KEYWORDS=USER
+    url: jdbc:h2:mem:until;NON_KEYWORDS=USER,ORDER
     username: tester
     password: qwer!@#$
     driverClassName: org.h2.Driver
