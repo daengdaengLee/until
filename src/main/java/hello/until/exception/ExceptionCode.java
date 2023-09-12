@@ -10,8 +10,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum ExceptionCode {
-    NO_USER_TO_CREATE_ITEM(HttpStatus.BAD_REQUEST, "상품 생성을 위한 유저 정보가 없습니다."),
 	NO_USER_TO_GET(HttpStatus.BAD_REQUEST, "해당 유저 정보가 없습니다."),
+    NO_USER_TO_GET(HttpStatus.BAD_REQUEST, "해당 유저 정보가 없습니다."),
+    NO_USER_TO_CREATE_ITEM(HttpStatus.BAD_REQUEST, "상품 생성을 위한 유저 정보가 없습니다."),
     NO_USER_TO_UPDATE(HttpStatus.BAD_REQUEST, "수정할 유저가 없습니다."),
     NO_ITEM_TO_UPDATE(HttpStatus.BAD_REQUEST, "수정할 상품이 없습니다."),
     DUPLICATE_EMAIL_USER_TO_CREATE(HttpStatus.CONFLICT, "이미 가입 된 회원 메일입니다.");
