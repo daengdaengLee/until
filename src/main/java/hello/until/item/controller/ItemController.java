@@ -38,10 +38,12 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
+    public ItemResponse createItem(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody @Validated CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
-        Long userId = createItemRequest.userId();
+        Long userId = principalDetails.getUser().getId();
 
         return new ItemResponse(this.itemService.createItem(name, price, userId));
     }
