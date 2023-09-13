@@ -1,8 +1,10 @@
 package hello.until.item.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import hello.until.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -33,4 +35,8 @@ public class Item {
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(updatable = false)
+    private User user;
 }

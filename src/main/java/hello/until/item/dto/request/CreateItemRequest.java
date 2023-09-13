@@ -7,5 +7,7 @@ public record CreateItemRequest(
         @NotEmpty
         String name,
         @NotNull
-        Integer price) {
+        Integer price,
+        @NotNull
+        Long userId) {
 }
