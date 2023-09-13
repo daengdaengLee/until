@@ -25,25 +25,9 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
-	
 	private final PasswordEncoder passwordEncoder;
 	
-	private final JwtService jwtService;
-	
-	private final AuthenticationManager authenticationManager;
-	
-	public LoginResponse login(String email, String password) {
-		authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-		
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
-		PrincipalDetails principalDetails = new PrincipalDetails(user);
-		String jwtToken = jwtService.generateToken(principalDetails);
 
-		return LoginResponse.builder().accessToken(jwtToken).build();
-	}
-
-	
 	@Transactional
 	public void createUser(String email, String password) {
 

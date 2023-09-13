@@ -32,11 +32,6 @@ public class UserController {
 
 	private final UserService userService;
 
-	@PostMapping("/login")
-	public LoginResponse authenticate(@RequestBody @Valid LoginRequest loginRequest) {
-		return userService.login(loginRequest.getEmail(), loginRequest.getPassword());
-	}
-	
 	@PostMapping("/join")
 	public void join(@RequestBody @Valid CreateUserRequest createUserRequest) {
 		userService.createUser(createUserRequest.getEmail(), createUserRequest.getPassword());
