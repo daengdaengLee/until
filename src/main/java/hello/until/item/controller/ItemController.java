@@ -6,6 +6,7 @@ import hello.until.item.dto.request.UpdateItemRequest;
 import hello.until.item.dto.response.ItemResponse;
 import hello.until.item.dto.response.ReadAllItemResponse;
 import hello.until.item.service.ItemService;
+import hello.until.user.constant.Role;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,8 +45,9 @@ public class ItemController {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
         Long userId = principalDetails.getUser().getId();
+        Role role = principalDetails.getUser().getRole();
 
-        return new ItemResponse(this.itemService.createItem(name, price, userId));
+        return new ItemResponse(this.itemService.createItem(name, price, userId, role));
     }
 
     @PatchMapping("/{id}")
