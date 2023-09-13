@@ -1,5 +1,6 @@
 package hello.until.item.controller;
 
+import hello.until.auth.PrincipalDetails;
 import hello.until.item.dto.request.CreateItemRequest;
 import hello.until.item.dto.request.UpdateItemRequest;
 import hello.until.item.dto.response.ItemResponse;
@@ -8,6 +9,7 @@ import hello.until.item.service.ItemService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -52,7 +54,10 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteItem(@PathVariable Long id) {
-        this.itemService.deleteItem(id);
+    public void deleteItem(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @PathVariable Long id) {
+        var requestUserId = principalDetails.getUser().getId();
+        this.itemService.deleteItem(id, requestUserId);
     }
 }
