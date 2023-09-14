@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -80,7 +79,7 @@ public class ItemService {
             return;
         }
         var item = itemResult.get();
-        if (!Objects.equals(item.getUser().getId(), user.getId())) {
+        if (item.getUser() == null || item.getUser().isSameUser(user)) {
             // @TODO 커스텀 예외 처리
             throw new RuntimeException("상품 판매자만 상품 삭제가 가능합니다.");
         }
