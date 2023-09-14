@@ -22,14 +22,27 @@ public class OrderService {
     private final ItemService itemService;
 
     @Transactional
-    public Order save(OrderStatus status, Long userId, Long itemId){
-        User user = userService.getUserById(userId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
+    public Order requestOrder(OrderStatus status, Long buyerId, Long itemId){
+        User buyer = userService.getUserById(buyerId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
         Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
         Order order = Order.builder()
                 .status(status)
-                .user(user)
+                .user(buyer)
                 .item(item)
                 .build();
         return orderRepository.save(order);
+    }
+
+    @Transactional
+    public Order approveOrder(Long orderId, Long sellerId, Long itemId){
+        Order order = this.getOrderById(orderId);
+        User seller = userService.getUserById(sellerId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
+        Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
+        return orderRepository.save(order);
+    }
+
+    public Order getOrderById(Long orderId){
+        return orderRepository.findById(orderId).orElseThrow(
+                () -> new CustomException(ExceptionCode.NO_ORDER));
     }
 }

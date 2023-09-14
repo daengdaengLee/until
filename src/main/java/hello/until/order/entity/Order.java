@@ -19,11 +19,14 @@ public class Order {
     private OrderStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false, updatable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "itemId")
+    @JoinColumn(name = "itemId", nullable = false, updatable = false)
     private Item item;
 
+    public void approve(){
+        this.status = OrderStatus.APPROVE;
+    }
 }

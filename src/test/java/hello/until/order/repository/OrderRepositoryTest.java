@@ -46,7 +46,7 @@ public class OrderRepositoryTest {
         Item dbItem = itemRepository.save(item);
         Order order = Order.builder()
                 .id(1L)
-                .status(OrderStatus.RECEIVED)
+                .status(OrderStatus.REQUEST)
                 .user(dbUser)
                 .item(dbItem)
                 .build();
