@@ -39,10 +39,6 @@ public class UserServiceTest {
 	
 	private PasswordEncoder passwordEncoder;
 	
-	@InjectMocks
-	private JwtService jwtService;
-	@Mock
-	private AuthenticationManager authenticationManager;
 	
 	private User testUser;
 	
@@ -52,7 +48,7 @@ public class UserServiceTest {
 	void beforeEach() {
 		
 	    passwordEncoder = new BCryptPasswordEncoder();
-		userService = new UserService(userRepository, passwordEncoder, jwtService, authenticationManager );
+		userService = new UserService(userRepository, passwordEncoder);
 		
 	    testUser = new User(); 
 	    testUser.setId(1L);

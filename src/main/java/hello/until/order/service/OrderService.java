@@ -37,7 +37,11 @@ public class OrderService {
     public Order approveOrder(Long orderId, Long sellerId, Long itemId){
         Order order = this.getOrderById(orderId);
         User seller = userService.getUserById(sellerId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
-        Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
+        Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_GET));
+        if (!item.getUser().equals(seller)){
+            throw new CustomException(ExceptionCode.CAN_NOT_APPROVE_ORDER);
+        }
+        order.approve();
         return orderRepository.save(order);
     }
 
