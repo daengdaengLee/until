@@ -37,8 +37,11 @@ public class ItemService {
     }
 
     @Transactional
-    public Item createItem(String name, Integer price, Long userId, Role role) {
-        if (!role.equals(Role.SELLER)) {
+    public Item createItem(String name, Integer price, Long userId, User user) {
+        if (!userId.equals(user.getId())) {
+            throw new CustomException(ExceptionCode.NO_MATCH_USER_TO_CREATE_ITEM);
+        }
+        if (!user.getRole().equals(Role.SELLER)) {
             throw new CustomException(ExceptionCode.NO_ROLE_TO_CREATE_ITEM);
         }
 
