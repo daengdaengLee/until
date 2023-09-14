@@ -4,18 +4,13 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import hello.until.auth.PrincipalDetails;
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
-import hello.until.jwt.JwtService;
 import hello.until.user.constant.Role;
-import hello.until.user.dto.response.LoginResponse;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
