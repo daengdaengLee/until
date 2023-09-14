@@ -57,7 +57,7 @@ public class ItemController {
     public void deleteItem(
             @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long id) {
-        var requestUserId = principalDetails.getUser().getId();
-        this.itemService.deleteItem(id, requestUserId);
+        var requestUser = principalDetails.getUser();
+        this.itemService.deleteItem(id, requestUser);
     }
 }

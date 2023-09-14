@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -73,13 +74,13 @@ public class ItemService {
 
     // @TODO 단위 테스트
     @Transactional
-    public void deleteItem(long id, long userId) {
+    public void deleteItem(long id, User user) {
         var itemResult = this.itemRepository.findById(id);
         if (itemResult.isEmpty()) {
             return;
         }
         var item = itemResult.get();
-        if (item.getUser().getId() != userId) {
+        if (!Objects.equals(item.getUser().getId(), user.getId())) {
             // @TODO 커스텀 예외 처리
             throw new RuntimeException("상품 판매자만 상품 삭제가 가능합니다.");
         }
