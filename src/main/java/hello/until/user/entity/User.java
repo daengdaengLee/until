@@ -1,26 +1,14 @@
 package hello.until.user.entity;
 
-import java.time.LocalDateTime;
-
+import hello.until.user.constant.Role;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import hello.until.user.constant.Role;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -29,7 +17,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,33 +24,37 @@ public class User {
 
     private String email;
     private String password;
-    
+
     @Enumerated(EnumType.STRING)
     private Role role;
-    
+
     @Column(updatable = false, nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
-    
+
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public void updateEmail(String email){
-        if(email != null){
+    public void updateEmail(String email) {
+        if (email != null) {
             this.email = email;
         }
     }
-    public void updatePassword(String password, PasswordEncoder passwordEncoder){
-        if(password != null){
+
+    public void updatePassword(String password, PasswordEncoder passwordEncoder) {
+        if (password != null) {
             this.password = passwordEncoder.encode(password);
         }
     }
 
-    public void updateRole(Role role){
-        if(role != null){
+    public void updateRole(Role role) {
+        if (role != null) {
             this.role = role;
         }
     }
-    
+
+    public boolean isSameUser(User user) {
+        return this.id != null && user != null && this.id.equals(user.getId());
+    }
 }
