@@ -327,14 +327,14 @@ class ItemControllerTest {
     void createItem() throws Exception {
         // given
         addPrincipalDetails(this.testUser);
-        when(itemService.createItem(testItem.getName(), testItem.getPrice(), testItem.getUser().getId(), testItem.getUser().getRole()))
+        when(itemService.createItem(testItem.getName(), testItem.getPrice(), testItem.getUser().getId(), testItem.getUser()))
                 .thenReturn(testItem);
 
         // when & then
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), testItem.getUser().getId()))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.id").value(testItem.getId().toString()))
@@ -349,15 +349,17 @@ class ItemControllerTest {
         var nameCaptor = ArgumentCaptor.forClass(String.class);
         var priceCaptor = ArgumentCaptor.forClass(Integer.class);
         var userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        var roleCaptor = ArgumentCaptor.forClass(Role.class);
-        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture(), userIdCaptor.capture(), roleCaptor.capture());
+        var userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture(), userIdCaptor.capture(), userCaptor.capture());
 
         var passedName = nameCaptor.getValue();
         var passedPrice = priceCaptor.getValue();
         var passedUserId = userIdCaptor.getValue();
+        var passedUser = userCaptor.getValue();
         assertThat(testItem.getName().equals(passedName)).isTrue();
         assertThat(testItem.getPrice().equals(passedPrice)).isTrue();
         assertThat(testItem.getUser().getId().equals(passedUserId)).isTrue();
+        assertThat(testItem.getUser().equals(passedUser)).isTrue();
     }
 
     @DisplayName("상품명 없이 상품을 등록하면 400을 반환한다.")
@@ -367,7 +369,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, testItem.getPrice()))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, testItem.getPrice(), testItem.getUser().getId()))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -378,7 +380,7 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), null))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), null, testItem.getUser().getId()))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -389,7 +391,23 @@ class ItemControllerTest {
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(null, null, testItem.getUser().getId()))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("자신의 userId 와 같지 않은 userId 로 상품을 등록하면 400을 반환한다.")
+    @Test
+    void createItemNoMatchUserId() throws Exception {
+        addPrincipalDetails(this.testUser);
+        Long userId = 0L;
+
+        when(itemService.createItem(testItem.getName(), testItem.getPrice(), userId, testItem.getUser()))
+                .thenThrow(new CustomException(ExceptionCode.NO_MATCH_USER_TO_CREATE_ITEM));
+
+        mockMvc
+                .perform(post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), userId))))
                 .andExpect(status().isBadRequest());
     }
 
