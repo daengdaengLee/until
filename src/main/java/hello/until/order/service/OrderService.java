@@ -22,11 +22,11 @@ public class OrderService {
     private final ItemService itemService;
 
     @Transactional
-    public Order requestOrder(OrderStatus status, Long buyerId, Long itemId){
+    public Order requestOrder(Long buyerId, Long itemId){
         User buyer = userService.getUserById(buyerId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
         Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_UPDATE));
         Order order = Order.builder()
-                .status(status)
+                .status(OrderStatus.REQUEST)
                 .user(buyer)
                 .item(item)
                 .build();
@@ -34,10 +34,10 @@ public class OrderService {
     }
 
     @Transactional
-    public Order approveOrder(Long orderId, Long sellerId, Long itemId){
+    public Order approveOrder(Long orderId, Long sellerId){
         Order order = this.getOrderById(orderId);
         User seller = userService.getUserById(sellerId).orElseThrow(() -> new CustomException(ExceptionCode.NO_USER_TO_GET));
-        Item item = itemService.readItem(itemId).orElseThrow(() -> new CustomException(ExceptionCode.NO_ITEM_TO_GET));
+        Item item = order.getItem();
         if (!item.getUser().equals(seller)){
             throw new CustomException(ExceptionCode.CAN_NOT_APPROVE_ORDER);
         }
