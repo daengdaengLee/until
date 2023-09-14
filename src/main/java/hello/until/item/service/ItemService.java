@@ -70,4 +70,19 @@ public class ItemService {
     public void deleteItem(long id) {
         this.itemRepository.deleteById(id);
     }
+
+    // @TODO 단위 테스트
+    @Transactional
+    public void deleteItem(long id, User user) {
+        var itemResult = this.itemRepository.findById(id);
+        if (itemResult.isEmpty()) {
+            return;
+        }
+        var item = itemResult.get();
+        if (item.getUser() == null || item.getUser().isSameUser(user)) {
+            // @TODO 커스텀 예외 처리
+            throw new RuntimeException("상품 판매자만 상품 삭제가 가능합니다.");
+        }
+        this.itemRepository.deleteById(id);
+    }
 }
