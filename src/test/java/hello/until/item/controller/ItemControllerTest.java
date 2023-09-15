@@ -75,8 +75,8 @@ class ItemControllerTest {
                 .id(1L)
                 .name("테스트 상품")
                 .price(10_000)
-                .createdAt(LocalDateTime.now().minusDays(1L))
-                .updatedAt(LocalDateTime.now())
+	                .createdAt(LocalDateTime.now().minusDays(1L))
+	                .updatedAt(LocalDateTime.now())
                 .user(user)
                 .build();
     }
