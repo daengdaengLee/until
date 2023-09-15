@@ -21,9 +21,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hello.until.auth.PrincipalDetails;
 import hello.until.item.dto.request.CreateItemRequest;
 import hello.until.item.entity.Item;
 import hello.until.item.service.ItemService;
+import hello.until.jwt.JwtService;
 import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,13 +40,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.item.dto.request.UpdateItemRequest;
-import hello.until.jwt.JwtService;
 
 @WebMvcTest(ItemController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -57,6 +60,7 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
     private Item testItem;
+    private User testUser;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     @MockBean
@@ -64,7 +68,7 @@ class ItemControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        User user = User.builder()
+        testUser = User.builder()
                 .id(1L)
                 .email("test@test.com")
                 .password("12345678")
@@ -75,9 +79,9 @@ class ItemControllerTest {
                 .id(1L)
                 .name("테스트 상품")
                 .price(10_000)
-	                .createdAt(LocalDateTime.now().minusDays(1L))
-	                .updatedAt(LocalDateTime.now())
-                .user(user)
+                .createdAt(LocalDateTime.now().minusDays(1L))
+                .updatedAt(LocalDateTime.now())
+                .user(this.testUser)
                 .build();
     }
 
@@ -322,7 +326,8 @@ class ItemControllerTest {
     @DisplayName("상품명, 상품 가격을 이용해 상품을 등록 한다.")
     void createItem() throws Exception {
         // given
-        when(itemService.createItem(testItem.getName(), testItem.getPrice(), testItem.getUser().getId()))
+        addPrincipalDetails(this.testUser);
+        when(itemService.createItem(testItem.getName(), testItem.getPrice(), testItem.getUser().getId(), testItem.getUser()))
                 .thenReturn(testItem);
 
         // when & then
@@ -344,19 +349,23 @@ class ItemControllerTest {
         var nameCaptor = ArgumentCaptor.forClass(String.class);
         var priceCaptor = ArgumentCaptor.forClass(Integer.class);
         var userIdCaptor = ArgumentCaptor.forClass(Long.class);
-        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture(), userIdCaptor.capture());
+        var userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(itemService, times(1)).createItem(nameCaptor.capture(), priceCaptor.capture(), userIdCaptor.capture(), userCaptor.capture());
 
         var passedName = nameCaptor.getValue();
         var passedPrice = priceCaptor.getValue();
         var passedUserId = userIdCaptor.getValue();
+        var passedUser = userCaptor.getValue();
         assertThat(testItem.getName().equals(passedName)).isTrue();
         assertThat(testItem.getPrice().equals(passedPrice)).isTrue();
         assertThat(testItem.getUser().getId().equals(passedUserId)).isTrue();
+        assertThat(testItem.getUser().equals(passedUser)).isTrue();
     }
 
     @DisplayName("상품명 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoName() throws Exception {
+        addPrincipalDetails(this.testUser);
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -367,6 +376,7 @@ class ItemControllerTest {
     @DisplayName("상품 가격 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoPrice() throws Exception {
+        addPrincipalDetails(this.testUser);
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -377,6 +387,7 @@ class ItemControllerTest {
     @DisplayName("상품명과 상품 가격 없이 상품을 등록하면 400을 반환한다.")
     @Test
     void createItemNoNameAndPrice() throws Exception {
+        addPrincipalDetails(this.testUser);
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -384,13 +395,19 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("회원 ID 없이 상품을 등록하면 400을 반환한다.")
+    @DisplayName("자신의 userId 와 같지 않은 userId 로 상품을 등록하면 400을 반환한다.")
     @Test
-    void createItemNoUserId() throws Exception {
+    void createItemNoMatchUserId() throws Exception {
+        addPrincipalDetails(this.testUser);
+        Long userId = 0L;
+
+        when(itemService.createItem(testItem.getName(), testItem.getPrice(), userId, testItem.getUser()))
+                .thenThrow(new CustomException(ExceptionCode.NO_MATCH_USER_TO_CREATE_ITEM));
+
         mockMvc
                 .perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), null))))
+                        .content(objectMapper.writeValueAsBytes(new CreateItemRequest(testItem.getName(), testItem.getPrice(), userId))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -612,5 +629,11 @@ class ItemControllerTest {
 
         var capturedPrice = priceCaptor.getValue();
         assertThat(capturedPrice).isEqualTo(price);
+    }
+
+    private void addPrincipalDetails(User user) {
+        PrincipalDetails principalDetails = new PrincipalDetails(user);
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

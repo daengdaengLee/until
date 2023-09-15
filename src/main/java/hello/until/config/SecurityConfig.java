@@ -32,6 +32,7 @@ public class SecurityConfig {
 				.sessionManagement(
 						(sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> authorize
+						.requestMatchers(new AntPathRequestMatcher("/items", HttpMethod.POST.name())).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/items/**", HttpMethod.DELETE.name())).authenticated()
                         .anyRequest().permitAll())
 				.authenticationProvider(authenticationProvider)

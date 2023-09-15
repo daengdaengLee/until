@@ -6,6 +6,7 @@ import hello.until.item.dto.request.UpdateItemRequest;
 import hello.until.item.dto.response.ItemResponse;
 import hello.until.item.dto.response.ReadAllItemResponse;
 import hello.until.item.service.ItemService;
+import hello.until.user.entity.User;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,12 +39,15 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemResponse createItem(@RequestBody @Validated CreateItemRequest createItemRequest) {
+    public ItemResponse createItem(
+            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @RequestBody @Validated CreateItemRequest createItemRequest) {
         String name = createItemRequest.name();
         Integer price = createItemRequest.price();
         Long userId = createItemRequest.userId();
+        User user = principalDetails.getUser();
 
-        return new ItemResponse(this.itemService.createItem(name, price, userId));
+        return new ItemResponse(this.itemService.createItem(name, price, userId, user));
     }
 
     @PatchMapping("/{id}")

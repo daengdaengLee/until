@@ -4,6 +4,7 @@ import hello.until.exception.CustomException;
 import hello.until.exception.ExceptionCode;
 import hello.until.item.entity.Item;
 import hello.until.item.repository.ItemRepository;
+import hello.until.user.constant.Role;
 import hello.until.user.entity.User;
 import hello.until.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +37,12 @@ public class ItemService {
     }
 
     @Transactional
-    public Item createItem(String name, Integer price, Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new CustomException(ExceptionCode.NO_USER_TO_CREATE_ITEM);
+    public Item createItem(String name, Integer price, Long userId, User user) {
+        if (!userId.equals(user.getId())) {
+            throw new CustomException(ExceptionCode.NO_MATCH_USER_TO_CREATE_ITEM);
+        }
+        if (!user.getRole().equals(Role.SELLER)) {
+            throw new CustomException(ExceptionCode.NO_ROLE_TO_CREATE_ITEM);
         }
 
         User userProxy = userRepository.getReferenceById(userId);

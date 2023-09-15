@@ -157,16 +157,13 @@ class ItemServiceTest {
         String name = this.testItem.getName();
         Integer price = this.testItem.getPrice();
         Long userId = this.testItem.getUser().getId();
+        Role role = this.testItem.getUser().getRole();
 
-        User user = new User();
-        user.setId(userId);
-
-        when(this.userRepository.existsById(userId)).thenReturn(true);
-        when(this.userRepository.getReferenceById(userId)).thenReturn(user);
+        when(this.userRepository.getReferenceById(userId)).thenReturn(User.builder().id(userId).build());
         when(this.itemRepository.save(any(Item.class))).thenReturn(this.testItem);
 
         // when
-        Item item = itemService.createItem(name, price, userId);
+        Item item = itemService.createItem(name, price, userId, testItem.getUser());
 
         // then
         var itemCaptor = ArgumentCaptor.forClass(Item.class);
@@ -181,22 +178,39 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("등록되지 않은 회원 ID로 상품명, 상품 가격으로 상품을 등록하면 회원 정보가 없다는 CustomException 이 발생한다.")
-    void createItemNotJoinUserId() {
+    @DisplayName("SELLER가 아닌 회원의 userId로 상품명, 상품 가격으로 상품을 등록하면 Seller가 아니라는 CustomException 이 발생한다.")
+    void createItemNotSeller() {
         // given
         String name = this.testItem.getName();
         Integer price = this.testItem.getPrice();
         Long userId = this.testItem.getUser().getId();
-
-        when(this.userRepository.existsById(userId)).thenReturn(false);
+        testItem.getUser().setRole(Role.BUYER);
 
         // then
-        var ex = catchThrowable(() -> itemService.createItem(name, price, userId));
+        var ex = catchThrowable(() -> itemService.createItem(name, price, userId, testItem.getUser()));
 
         // then
         assertThat(ex).isInstanceOf(CustomException.class);
         var code = ((CustomException) ex).getCode();
-        assertThat(code).isEqualTo(ExceptionCode.NO_USER_TO_CREATE_ITEM);
+        assertThat(code).isEqualTo(ExceptionCode.NO_ROLE_TO_CREATE_ITEM);
+    }
+
+    @Test
+    @DisplayName("등록할 userId 와 요청하는 회원의 userId 가 일치하지 않으면 CustomException 이 발생한다.")
+    void createItemNotMatchUserId() {
+        // given
+        String name = this.testItem.getName();
+        Integer price = this.testItem.getPrice();
+        Long userId = 0L;
+        testItem.getUser().setRole(Role.BUYER);
+
+        // then
+        var ex = catchThrowable(() -> itemService.createItem(name, price, userId, testItem.getUser()));
+
+        // then
+        assertThat(ex).isInstanceOf(CustomException.class);
+        var code = ((CustomException) ex).getCode();
+        assertThat(code).isEqualTo(ExceptionCode.NO_MATCH_USER_TO_CREATE_ITEM);
     }
 
     @Test
