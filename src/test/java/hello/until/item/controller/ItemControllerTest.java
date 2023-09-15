@@ -81,7 +81,7 @@ class ItemControllerTest {
                 .price(10_000)
                 .createdAt(LocalDateTime.now().minusDays(1L))
                 .updatedAt(LocalDateTime.now())
-                .user(this.testUser)
+                .user(user)
                 .build();
     }
 
